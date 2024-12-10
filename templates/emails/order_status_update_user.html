@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status Update</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .email-header {
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .email-body {
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .email-body h2 {
+            color: #007bff;
+        }
+        .email-footer {
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 10px;
+            font-size: 14px;
+            color: #777;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #007bff;
+            color: #ffffff;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Order Status Update</h1>
+        </div>
+        <div class="email-body">
+            <p>Dear {{ user.first_name }},</p>
+            <p>Your order with the following details has been updated:</p>
+            <h2>Order #{{ order.order_number }}</h2>
+            <p><strong>Status:</strong> {{ status }}</p>
+            <p>Thank you for shopping with us. We value your trust and business.</p>
+        </div>
+        <div class="email-footer">
+            &copy; {{ current_year }} MK Aquarium Orbit. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

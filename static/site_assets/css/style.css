@@ -1,0 +1,21 @@
+.swal2-popup {
+        width: 350px;
+        font-size: 10px;
+    }
+    .swal2-confirm,
+    .swal2-cancel {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    .swal2-icon {
+        font-size: 10px;
+    }
+
+
+    .ck-editor__editable  {
+        min-height: 300px !important;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        background-color: #f9f9f9;
+    }

@@ -1,0 +1,208 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light" data-pwa="true">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, viewport-fit=cover">
+    {% block account_title %}
+        <title>Aquarium | Account - Sign In</title>
+    {% endblock account_title %} 
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/alertify.min.css"/>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/css/themes/default.min.css"/>
+    <link rel="manifest" href="{% static 'manifest.json' %}" />
+
+    <link rel="icon" type="image/png" href="{% static 'site_assets/app-icons/icon-32x32.png' %}" sizes="32x32"/>
+    <link rel="apple-touch-icon" href="{% static 'site_assets/app-icons/icon-180x180.png' %}" />
+    <script src="{% static 'site_assets/js/theme-switcher.js' %}"></script>
+    <link rel="preload" href="{% static 'site_assets/fonts/inter-variable-latin.woff2' %}" as="font" type="font/woff2" crossorigin="" />
+    <link rel="preload" href="{% static 'site_assets/icons/cartzilla-icons.woff2' %}" as="font" type="font/woff2" crossorigin=""/>
+    <link rel="stylesheet" href="{% static 'site_assets/icons/cartzilla-icons.min.css' %}"/>
+    <link rel="preload" href="{% static 'site_assets/css/theme.min.css' %}" as="style" />
+    <link rel="preload" href="{% static 'site_assets/css/theme.rtl.min.css' %}" as="style"/>
+    <link rel="stylesheet" href="{% static 'site_assets/css/theme.min.css' %}" id="theme-styles"/>
+    <script src="{% static 'site_assets/js/customizer.min.js' %}"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .content-wrapper {
+            display: flex;
+            height: 100vh; /* Full screen height */
+        }
+        .form-section, .image-section {
+            flex: 1; /* Equal width for both sections */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .form-section {
+            background-color: #f0f4f8; /* Light background for the form section */
+            border-right: 1px solid #e0e0e0; /* Soft separator line */
+        }
+        .form-section .form-container {
+            width: 100%;
+            max-width: 600px; /* Ensure form doesn't get too wide */
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-section .form-container h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+        {% comment %} .image-section {
+            position: relative;
+            overflow: hidden;
+        } {% endcomment %}
+        .image-section {
+            position: relative;
+            overflow: hidden;
+            display:none;
+           
+        }
+        .image-section img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensure the image covers the section */
+        }
+
+        .form-container button {
+            margin-bottom: 15px;
+            margin-top: 15px;
+            font-size: 1rem;
+            border-radius: 5px;
+            width:100%;
+            border: 1px solid #ccc;
+        }
+
+        .form-container input,
+        {
+            margin-bottom: 15px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .form-container button {
+            background-color: #b23225;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-container button:hover {
+            background-color: #b23225;
+        }
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column; /* Stack sections vertically */
+            }
+            .form-section, .image-section {
+                height: 50vh; /* Equal height for both sections */
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+{% block accountContent %}
+<main class="content-wrapper">
+    <!-- Left Section: Form -->
+    <div class="form-section">
+        <div class="form-container">
+            <header class="d-flex justify-content-center pt-3">
+                <a href="" class="navbar-brand pt-0">
+                    <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" alt="Logo" class="img-fluid" style="height: 150px;">
+                </a>
+            </header>
+            <h1 class="d-flex justify-content-center pt-3" style="color:#b23225;">ISKCON</h1>
+            <h1 class="d-flex justify-content-center pt-3" >Welcome Back</h1>
+            <div class="nav fs-sm mb-3 mb-lg-4 d-flex justify-content-center"> Don't have an account?
+                <a class="nav-link text-decoration-underline p-0 ms-2" href="{% url 'admin_register' %}">Create an account</a>
+              </div>
+            <form class="needs-validation" novalidate method="post" action="">
+                {% csrf_token %}
+                <div class="position-relative mb-4">
+                    <input type="text" class="form-control form-control-lg" placeholder="Username" name="username" required="">
+                    <div class="invalid-tooltip bg-transparent py-0">Enter a valid username!</div>
+                </div>
+                <div class="mb-4">
+                    <div class="password-toggle">
+                        <input type="password" class="form-control form-control-lg" placeholder="Password" name="password" minlength="8" required="">
+                        <div class="invalid-tooltip bg-transparent py-0">Password is incorrect!</div>
+                        <label class="password-toggle-button fs-lg" aria-label="Show/hide password">
+                          <input type="checkbox" class="btn-check" />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="remember-30" name="remember">
+                        <label for="remember-30" class="form-check-label">Remember</label>
+                      </div>
+                    <div class="nav">
+                        <a class="nav-link animate-underline p-0" href="">
+                            <span class="animate-target">Forgot password?</span>
+                        </a>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-lg btn-primary">Sign In</button>
+            </form>
+
+            <footer class="mt-auto">
+                <p class="fs-xs mb-0">
+                    © All rights reserved. Made by <a class="text-dark-emphasis text-decoration-none" href="https://geegatechnologies.com/" target="_blank">Geega Technologies</a>
+                </p>
+            </footer>
+        </div>
+    </div>
+</main>
+{% endblock accountContent %}
+<script src="{% static 'site_assets/js/theme.min.js' %}"></script>
+<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.14.0/build/alertify.min.js"></script>
+<script>
+
+    function restrictToNumbers(event) {
+        const charCode = event.which || event.keyCode;
+        if (charCode < 48 || charCode > 57) {
+          event.preventDefault();
+          return false;
+        }
+        return true;
+      }
+      function validateMobileNumber(input) {
+        const validationMessage = document.getElementById("mobile-validation-message");
+        const isValid = /^[0-9]{10}$/.test(input.value);
+        if (isValid) {
+          validationMessage.style.display = "none";
+          input.classList.remove("is-invalid");
+        } else {
+          validationMessage.style.display = "block";
+          input.classList.add("is-invalid");
+        }
+      }
+
+    {% if messages %}
+    {% for message in messages %}
+        alertify.set('notifier', 'position', 'bottom-right');
+        {% if message.tags == 'success' %}
+            alertify.success('{{ message }}');
+        {% elif message.tags == 'error' %}
+            alertify.error('{{ message }}');
+        {% elif message.tags == 'warning' %}
+            alertify.warning('{{ message }}');
+        {% else %}
+            alertify.message('{{ message }}');
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+
+</script>
+</body>
+</html>

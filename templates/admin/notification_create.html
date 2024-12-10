@@ -1,0 +1,107 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | Notification Create</title>
+{% endblock title %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <form id="notification-form" action="{% url 'notification_create' %}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Notification Image Upload -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Notification Image</h4>
+                            <div id="file-previews" style="display: flex; flex-wrap: wrap; margin-top: 10px;"></div>
+                            <input class="form-control mt-3" name="notification_image" type="file" accept="image/*" id="notificationImageUpload" required>
+                            <small class="text-danger invalid-feedback">Please upload a valid image.</small>
+                        </div>
+                    </div>
+
+                    <!-- Notification Title -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Notification Details</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Notification Title -->
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Notification Title</label>
+                                        <input type="text" name="title" id="title" class="form-control" placeholder="Enter Notification Title" required>
+                                        <small class="text-danger invalid-feedback">Please enter a valid notification title.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Notification Description -->
+                            <div class="col-lg-12">
+                                <label for="description" class="form-label">Notification Message</label>
+                                <textarea name="description" id="description" class="form-control" style="display:none;">  </textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-3 bg-light mb-3 rounded">
+                        <div class="row justify-content-end g-2">
+                            <div class="col-lg-2">
+                                <button type="submit" class="btn btn-outline-secondary w-100">Create</button>
+                            </div>
+                            <div class="col-lg-2">
+                                <a href="{% url 'notifications' %}" class="btn btn-primary w-100">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Image Preview on File Input Change
+    const notificationImageUpload = document.getElementById('notificationImageUpload');
+    const filePreviews = document.getElementById('file-previews');
+
+    notificationImageUpload.addEventListener('change', function (event) {
+        filePreviews.innerHTML = ''; // Clear any previous previews
+
+        const files = event.target.files;
+        if (files.length > 0) {
+            const file = files[0];
+
+            // Create an image element to display the preview
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.classList.add('img-thumbnail');
+            img.style.maxWidth = '200px';
+            img.style.marginTop = '10px';
+            filePreviews.appendChild(img);
+        }
+    });
+
+    ClassicEditor
+        .create(document.querySelector('#editor'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote']
+        })
+        .then(editor => {
+            // Set the initial content of the editor
+            editor.setData(document.querySelector('#description').value);
+            
+            // Update the hidden input value when the content changes
+            editor.model.document.on('change:data', () => {
+                document.querySelector('#description').value = editor.getData();
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+{% endblock %}

@@ -1,0 +1,226 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | FAQ List</title>
+{% endblock title %}
+
+{% block content %}
+<style>
+    /* Custom styles for SweetAlert */
+    .swal2-popup {
+        width: 350px;
+        font-size: 10px;
+    }
+
+    .swal2-confirm,
+    .swal2-cancel {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
+    .swal2-icon {
+        font-size: 10px;
+    }
+</style>
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center gap-1">
+                        <h4 class="card-title flex-grow-1">FAQ List</h4>
+                        <a href="{% url 'faq_create' %}" class="btn btn-sm btn-primary">Create New FAQ</a>
+                    </div>
+                    <div>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0 table-hover table-centered">
+                                <thead class="bg-light-subtle">
+                                    <tr>
+                                        <th style="width: 20px;">
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="customCheck1">
+                                                <label class="form-check-label" for="customCheck1"></label>
+                                            </div>
+                                        </th>
+                                        <th>ID</th>
+                                        <th>Question</th>
+                                        <th>Answer</th>
+                                        <th>FAQ's Type</th>
+                                        <th>is_Active</th>
+                                        <th>Created At</th>
+                                        <th>Updated At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for faq in faqs %}
+                                    <tr>
+                                        <td>
+                                            <div class="form-check">
+                                                <input type="checkbox" class="form-check-input" id="customCheck2">
+                                                <label class="form-check-label" for="customCheck2"></label>
+                                            </div>
+                                        </td>
+                                        <td>{{ faq.id }}</td>
+                                        <td>{{ faq.question|capfirst }}</td>
+                                        <td>{{ faq.answer|capfirst }}</td>
+                                        <td>{{ faq.faqs_type|capfirst }}</td>
+                                        <td>
+                                            {% if faq.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                            {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ faq.created_at|date:"M d, Y h:i A" }}</td>
+                                        <td>{{ faq.updated_at|date:"M d, Y h:i A" }}</td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <a href="{% url 'faq_update' faq.pk %}" class="btn btn-soft-primary btn-sm">
+                                                    <iconify-icon icon="solar:pen-2-broken" class="align-middle fs-18"></iconify-icon>
+                                                </a>
+                                                <a href="javascript:void(0);" class="btn btn-soft-danger btn-sm delete-button" data-url="{% url 'faq_delete' faq.pk %}">
+                                                    <iconify-icon icon="solar:trash-bin-minimalistic-2-broken" class="align-middle fs-18"></iconify-icon>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="9" class="text-center text-warning fw-bold p-5">No FAQs available</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer border-top">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-end mb-0">
+                                {% if faqs.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ faqs.previous_page_number }}">Previous</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">Previous</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for page_num in faqs.paginator.page_range %}
+                                    {% if faqs.number == page_num %}
+                                        <li class="page-item active">
+                                            <a class="page-link" href="#">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if faqs.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ faqs.next_page_number }}">Next</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <script>document.write(new Date().getFullYear())</script> &copy; Aquarium E-Commerce. Developed by 
+                    <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> 
+                    <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    document.querySelectorAll(".delete-button").forEach(function (button) {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            let deleteUrl = this.getAttribute('data-url');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                confirmButtonClass: 'btn btn-primary w-xs me-2 mt-2',
+                cancelButtonClass: 'btn btn-danger w-xs mt-2',
+                buttonsStyling: false
+            }).then(function (result) {
+                if (result.value) {
+                    fetch(deleteUrl, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'The FAQ has been deleted.',
+                                icon: 'success',
+                                confirmButtonClass: 'btn btn-primary w-xs mt-2',
+                                buttonsStyling: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: data.message,
+                                icon: 'error',
+                                confirmButtonClass: 'btn btn-primary w-xs mt-2',
+                                buttonsStyling: false
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'An error occurred while deleting the FAQ.',
+                            icon: 'error',
+                            confirmButtonClass: 'btn btn-primary w-xs mt-2',
+                            buttonsStyling: false
+                        });
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    Swal.fire({
+                        title: 'Cancelled',
+                        text: 'Your FAQ is safe :)',
+                        icon: 'error',
+                        confirmButtonClass: 'btn btn-primary mt-2',
+                        buttonsStyling: false
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

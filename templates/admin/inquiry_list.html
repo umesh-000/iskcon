@@ -1,0 +1,179 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | User Inquiry List</title>
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center gap-1">
+                        <h4 class="card-title flex-grow-1">User Inquiry List</h4>
+                    </div>
+                    <div>
+                        <div class="table-responsive">
+                            <table class="table align-middle mb-0 table-hover table-centered">
+                                <thead class="bg-light-subtle">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>First Name</th>
+                                        <th>Last Name</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>Subject</th>
+                                        <th>Message</th>
+                                        <th>Submitted At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inquiry in inquiry %}
+                                    <tr>
+                                        <td>{{ inquiry.id }}</td>
+                                        <td>{{ inquiry.first_name|capfirst }}</td>
+                                        <td>{{ inquiry.last_name|capfirst }}</td>
+                                        <td>{{ inquiry.email }}</td>
+                                        <td>{{ inquiry.phone }}</td>
+                                        <td>{{ inquiry.get_subject_display }}</td>
+                                        <td>{{ inquiry.message|truncatewords:10 }}</td>
+                                        <td>{{ inquiry.submitted_at|date:"M d, Y h:i A" }}</td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <!-- View button with data attributes for passing inquiry data -->
+                                                <a href="#" class="btn btn-soft-primary btn-sm" data-bs-toggle="modal" data-bs-target="#exampleModalScrollable"
+                                                    data-id="{{ inquiry.id }}"
+                                                    data-first-name="{{ inquiry.first_name }}"
+                                                    data-last-name="{{ inquiry.last_name }}"
+                                                    data-email="{{ inquiry.email }}"
+                                                    data-phone="{{ inquiry.phone }}"
+                                                    data-subject="{{ inquiry.get_subject_display }}"
+                                                    data-message="{{ inquiry.message }}"
+                                                    data-submitted-at="{{ inquiry.submitted_at|date:"M d, Y h:i A" }}">
+                                                    <iconify-icon icon="mdi:eye" class="align-middle fs-18"></iconify-icon> View
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="9" class="text-center text-warning fw-bold p-5">No inquiries available</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer border-top">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-end mb-0">
+                                {% if inquiry.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ inquiry.previous_page_number }}">Previous</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">Previous</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for page_num in inquiry.paginator.page_range %}
+                                    {% if inquiry.number == page_num %}
+                                        <li class="page-item active">
+                                            <a class="page-link" href="#">{{ page_num }}</a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if inquiry.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ inquiry.next_page_number }}">Next</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModalScrollable" tabindex="-1" aria-labelledby="exampleModalScrollableTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalScrollableTitle">View Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Display inquiry details here -->
+                                        <p><strong>Name:</strong> <span id="modal-first-name"></span> <span id="modal-last-name"></span></p>
+                                        <p><strong>Subject:</strong> <span id="modal-subject"></span></p>
+                                        <p><strong>Message:</strong> <span id="modal-message"></span></p>
+                                        <p><strong>Email:</strong> <span id="modal-email"></span></p>
+                                        <p><strong>Phone:</strong> <span id="modal-phone"></span></p>
+                                        <p><strong>Submitted On:</strong> <span id="modal-date"></span></p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <script>document.write(new Date().getFullYear())</script> &copy; Aquarium E-Commerce. Developed by 
+                    <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> 
+                    <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const viewButtons = document.querySelectorAll('[data-bs-target="#exampleModalScrollable"]');
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function (event) {
+                const button = event.target.closest('[data-bs-toggle="modal"]');
+                const subject = button.getAttribute('data-subject');
+                const message = button.getAttribute('data-message');
+                const firstName = button.getAttribute('data-first-name');
+                const lastName = button.getAttribute('data-last-name');
+                const email = button.getAttribute('data-email');
+                const phone = button.getAttribute('data-phone');
+                const date = button.getAttribute('data-submitted-at');
+    
+                document.getElementById('modal-subject').textContent = subject || 'N/A';
+                document.getElementById('modal-message').textContent = message || 'N/A';
+                document.getElementById('modal-first-name').textContent = firstName || 'N/A';
+                document.getElementById('modal-last-name').textContent = lastName || 'N/A';
+                document.getElementById('modal-email').textContent = email || 'N/A';
+                document.getElementById('modal-phone').textContent = phone || 'N/A';
+                document.getElementById('modal-date').textContent = date || 'N/A';
+            });
+        });
+    });
+</script>
+{% endblock content %}

@@ -1,0 +1,567 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}
+     <title> Admin | Dashboard </title>
+{% endblock title %}
+
+
+ <!-- START Wrapper -->
+ <div class="wrapper">
+     {% block topbar %}
+     <!-- ============================ Topbar Start ============================ -->
+     <header class="topbar">
+          <div class="container-fluid">
+               <div class="navbar-header">
+                    <div class="d-flex align-items-center">
+                         <!-- Menu Toggle Button -->
+                         <div class="topbar-item">
+                              <button type="button" class="button-toggle-menu me-2">
+                                   <iconify-icon icon="solar:hamburger-menu-broken" class="fs-24 align-middle"></iconify-icon>
+                              </button>
+                         </div>
+
+                         <!-- Menu Toggle Button -->
+                         <div class="topbar-item">
+                              
+                              <h4 class="fw-bold topbar-button pe-none text-uppercase mb-0">Welcome! <p  class="fw-bold footer-text">{{ admin_user.username}}</p></h4>
+                         </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-1">
+
+                         <!-- App Search-->
+                         <form class="app-search d-none d-md-block ms-2">
+                              <div class="position-relative">
+                                   <input type="search" class="form-control" placeholder="Search..." autocomplete="off" value="">
+                                   <iconify-icon icon="solar:magnifer-linear" class="search-widget-icon"></iconify-icon>
+                              </div>
+                         </form>
+
+                         <!-- Theme Color (Light/Dark) -->
+                         <div class="topbar-item">
+                              <button type="button" class="topbar-button" id="light-dark-mode">
+                                   <iconify-icon icon="solar:moon-bold-duotone" class="fs-24 align-middle"></iconify-icon>
+                              </button>
+                         </div>
+
+                         <!-- Notification -->
+                         <div class="dropdown topbar-item">
+                              <button type="button" class="topbar-button position-relative" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                   <iconify-icon icon="solar:bell-bing-bold-duotone" class="fs-24 align-middle"></iconify-icon>
+                                   <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">2<span class="visually-hidden">unread messages</span></span>
+                              </button>
+                              <div class="dropdown-menu py-0 dropdown-lg dropdown-menu-end" aria-labelledby="page-header-notifications-dropdown">
+                                   <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
+                                        <div class="row align-items-center">
+                                             <div class="col">
+                                                  <h6 class="m-0 fs-16 fw-semibold"> Notifications</h6>
+                                             </div>
+                                             <div class="col-auto">
+                                                  <a href="javascript: void(0);" class="text-dark text-decoration-underline">
+                                                       <small>Clear All</small>
+                                                  </a>
+                                             </div>
+                                        </div>
+                                   </div>
+                                   <div data-simplebar style="max-height: 280px;">
+                                        <!-- Item -->
+                                        <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom">
+                                             <div class="d-flex">
+                                                  <div class="flex-shrink-0">
+                                                       <img src="{% static '/assets/images/users/avatar-3.jpg' %}" class="img-fluid me-2 avatar-sm rounded-circle" alt="avatar-3" />
+                                                  </div>
+                                                  <div class="flex-grow-1">
+                                                       <p class="mb-0 fw-semibold">Jacob Gines</p>
+                                                       <p class="mb-0 text-wrap">Answered to your comment on the cash flow forecast's graph 🔔.</p>
+                                                  </div>
+                                             </div>
+                                        </a>
+                                        <!-- Item -->
+                                        <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom">
+                                             <div class="d-flex">
+                                                  <div class="flex-shrink-0">
+                                                       <div class="avatar-sm me-2">
+                                                            <span class="avatar-title bg-soft-warning text-warning fs-20 rounded-circle">
+                                                                 <iconify-icon icon="iconamoon:comment-dots-duotone"></iconify-icon>
+                                                            </span>
+                                                       </div>
+                                                  </div>
+                                                  <div class="flex-grow-1">
+                                                       <p class="mb-0 fw-semibold text-wrap">You have received <b>20</b> new messages in the
+                                                            conversation</p>
+                                                  </div>
+                                             </div>
+                                        </a>
+                                        
+                                   </div>
+                                   <div class="text-center py-3">
+                                        <a href="javascript:void(0);" class="btn btn-primary btn-sm">View All Notification <i class="bx bx-right-arrow-alt ms-1"></i></a>
+                                   </div>
+                              </div>
+                         </div>
+
+                         <!-- Theme Setting -->
+                         <div class="topbar-item d-none d-md-flex">
+                              <button type="button" class="topbar-button" id="theme-settings-btn" data-bs-toggle="offcanvas" data-bs-target="#theme-settings-offcanvas" aria-controls="theme-settings-offcanvas">
+                                   <iconify-icon icon="solar:settings-bold-duotone" class="fs-24 align-middle"></iconify-icon>
+                              </button>
+                         </div>
+                         
+                         <!-- User -->
+                         <div class="dropdown topbar-item">
+                              <a type="button" class="topbar-button" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                   <span class="d-flex align-items-center">
+                                       {% if admin_profile.user.profile_image %}
+                                           <img class="rounded-circle" width="32" src="{{ admin_profile.user.profile_image.url }}" alt="User Image">
+                                       {% else %}
+                                           <img class="rounded-circle" width="32" src="{% static 'assets/images/users/default_avatar.png' %}" alt="Default Image">
+                                       {% endif %}
+                                   </span>
+                               </a>
+                              <div class="dropdown-menu dropdown-menu-end">
+                                   <!-- item-->
+                                   <h6 class="dropdown-header">Welcome <p  class="fw-bold footer-text">{{ admin_user.username}}</p></h6>
+                                   <a class="dropdown-item" href="">
+                                        <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Profile</span>
+                                   </a>
+                                   <div class="dropdown-divider my-1"></div>
+
+                                   <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                        <i class="bx bx-log-out fs-18 align-middle me-1"></i><span class="align-middle">Logout</span>
+                                   </a>
+                              </div>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     </header>
+     <!-- Right Sidebar (Theme Settings) -->
+     <div>
+          <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="theme-settings-offcanvas">
+               <div class="d-flex align-items-center bg-primary p-3 offcanvas-header">
+                    <h5 class="text-white m-0">Theme Settings</h5>
+                    <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+               </div>
+
+               <div class="offcanvas-body p-0">
+                    <div data-simplebar class="h-100">
+                         <div class="p-3 settings-bar">
+
+                              <div>
+                                   <h5 class="mb-3 font-16 fw-semibold">Color Scheme</h5>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-bs-theme" id="layout-color-light" value="light">
+                                        <label class="form-check-label" for="layout-color-light">Light</label>
+                                   </div>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-bs-theme" id="layout-color-dark" value="dark">
+                                        <label class="form-check-label" for="layout-color-dark">Dark</label>
+                                   </div>
+                              </div>
+
+                              <div>
+                                   <h5 class="my-3 font-16 fw-semibold">Topbar Color</h5>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-light" value="light">
+                                        <label class="form-check-label" for="topbar-color-light">Light</label>
+                                   </div>
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-topbar-color" id="topbar-color-dark" value="dark">
+                                        <label class="form-check-label" for="topbar-color-dark">Dark</label>
+                                   </div>
+                              </div>
+
+
+                              <div>
+                                   <h5 class="my-3 font-16 fw-semibold">Menu Color</h5>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-menu-color" id="leftbar-color-light" value="light">
+                                        <label class="form-check-label" for="leftbar-color-light">
+                                             Light
+                                        </label>
+                                   </div>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-menu-color" id="leftbar-color-dark" value="dark">
+                                        <label class="form-check-label" for="leftbar-color-dark">
+                                             Dark
+                                        </label>
+                                   </div>
+                              </div>
+
+                              <div>
+                                   <h5 class="my-3 font-16 fw-semibold">Sidebar Size</h5>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-default" value="default">
+                                        <label class="form-check-label" for="leftbar-size-default">
+                                             Default
+                                        </label>
+                                   </div>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-small" value="condensed">
+                                        <label class="form-check-label" for="leftbar-size-small">
+                                             Condensed
+                                        </label>
+                                   </div>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-hidden" value="hidden">
+                                        <label class="form-check-label" for="leftbar-hidden">
+                                             Hidden
+                                        </label>
+                                   </div>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-small-hover-active" value="sm-hover-active">
+                                        <label class="form-check-label" for="leftbar-size-small-hover-active">
+                                             Small Hover Active
+                                        </label>
+                                   </div>
+
+                                   <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="data-menu-size" id="leftbar-size-small-hover" value="sm-hover">
+                                        <label class="form-check-label" for="leftbar-size-small-hover">
+                                             Small Hover
+                                        </label>
+                                   </div>
+                              </div>
+
+                         </div>
+                    </div>
+               </div>
+               <div class="offcanvas-footer border-top p-3 text-center">
+                    <div class="row">
+                         <div class="col">
+                              <button type="button" class="btn btn-danger w-100" id="reset-layout">Reset</button>
+                         </div>
+                    </div>
+               </div>
+          </div>
+     </div>
+     <!-- ============================ Topbar End ============================ -->
+     {% endblock topbar %}
+
+     
+     {% block sidebar %}
+     <!-- ========== Sidebar Start ========== -->
+     <div class="main-nav">
+          <!-- Sidebar Logo -->
+          <div class="logo-box">
+               <a href="index.html" class="logo-dark">
+                    <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-sm" alt="logo sm"> 
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                         <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-lg pt-2 mb-2" alt="logo" style="height:60px; width:100px;">
+                     </div>
+               </a>
+
+               <a href="index.html" class="logo-light">
+                    <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-sm" alt="logo sm">
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                         <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-lg pt-2 mb-2" alt="logo light" style="height:60px; width:100px;">
+                     </div>
+               </a>
+              
+          </div>
+
+          <!-- Menu Toggle Button (sm-hover) -->
+          <button type="button" class="button-sm-hover" aria-label="Show Full Sidebar">
+               <iconify-icon icon="solar:double-alt-arrow-right-bold-duotone" class="button-sm-hover-icon"></iconify-icon>
+          </button>
+
+          <div class="scrollbar" data-simplebar>
+               <ul class="navbar-nav" id="navbar-nav">
+                    <li class="menu-title">General</li>
+
+                    <li class="nav-item">
+                         <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                              <span class="nav-icon">
+                                   <iconify-icon icon="solar:widget-5-bold-duotone"></iconify-icon>
+                              </span>
+                              <span class="nav-text"> Dashboard </span>
+                         </a>
+                    </li>
+
+
+                    <li class="nav-item">
+                         <a class="nav-link" href="{% url 'blog_list' %}">
+                              <span class="nav-icon">
+                                   <iconify-icon icon="mdi:post-outline"></iconify-icon>
+                              </span>
+                              <span class="nav-text"> Blogs </span>
+                         </a>
+                    </li>
+
+
+                    <li class="nav-item">
+                         <a class="nav-link" href="{% url 'book_list' %}">
+                             <span class="nav-icon">
+                                 <iconify-icon icon="solar:book-broken"></iconify-icon>
+                             </span>
+                             <span class="nav-text"> Books </span>
+                         </a>
+                     </li> 
+
+
+
+                    <li class="nav-item">
+                         <a class="nav-link" href="{% url 'event_list' %}">
+                              <span class="nav-icon">
+                                   <iconify-icon icon="mdi:calendar-check"></iconify-icon>
+                              </span>
+                              <span class="nav-text"> Events </span>
+                         </a>
+                    </li>                                                      
+                    <li class="menu-title mt-2">Pages Section</li>
+                    <li class="nav-item">
+                         <a class="nav-link menu-arrow" href="#sidebarProducts" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarProducts">
+                              <span class="nav-icon">
+                                   <iconify-icon icon="bi:list"></iconify-icon>
+                              </span>
+                              <span class="nav-text"> Pages </span>
+                         </a>
+                         <div class="collapse" id="sidebarProducts">
+                              <ul class="nav sub-navbar-nav">
+                                   <li class="sub-nav-item">
+                                        <a class="sub-nav-link" href="{% url "privacy_policy" %}">Privacy Policy</a>
+                                   </li>
+                                   <li class="sub-nav-item">
+                                        <a class="sub-nav-link" href="{% url "terms_and_conditions" %}">Terms and Conditions</a>
+                                   </li>
+                              </ul>
+                         </div>
+                    </li>
+
+                    <li class="nav-item">
+                         <a class="nav-link" href="{% url 'notifications' %}">
+                             <span class="nav-icon">
+                                 <iconify-icon icon="mdi:bell-ring-outline"></iconify-icon>
+                             </span>
+                             <span class="nav-text"> Notifications </span>
+                         </a>
+                     </li>
+
+               </ul>
+          </div>
+     </div>
+     <!-- ========== Sidebar End ========== -->
+     {% endblock sidebar %}
+
+
+     <!-- ============================ Start right Content here ============================ -->
+     {% block content %}
+     <div class="page-content">
+
+          <!-- Start Container Fluid -->
+          <div class="container-fluid">
+                <!-- Start here.... -->
+                <div class="row">
+                    <div class="col-xxl-5">
+                         <div class="row">
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <iconify-icon icon="solar:cart-5-bold-duotone" class="avatar-title fs-32 text-primary"></iconify-icon>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Total Orders</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_orders }}</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                        <div class="card-footer py-2 bg-light bg-opacity-50">
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                  <div>
+                                                       <span class="text-success"> <i class="bx bxs-up-arrow fs-12"></i> 2.3%</span>
+                                                       <span class="text-muted ms-1 fs-12">Last Week</span>
+                                                  </div>
+                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
+                                             </div>
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div> <!-- end col -->
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <i class="fs-24 avatar-title text-primary">₹</i>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Total revenue</p>
+                                                       <h3 class="text-dark mt-1 mb-0"> ₹{{ total_revenue }}</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                        <div class="card-footer py-2 bg-light bg-opacity-50">
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                  <div>
+                                                       <span class="text-success"> <i class="bx bxs-up-arrow fs-12"></i> 8.1%</span>
+                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
+                                                  </div>
+                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
+                                             </div>
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div> <!-- end col -->
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <i class="bx bxs-user avatar-title fs-24 text-primary"></i>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Total users</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_customers }}</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                        <div class="card-footer py-2 bg-light bg-opacity-50">
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                  <div>
+                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 0.3%</span>
+                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
+                                                  </div>
+                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
+                                             </div>
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div> <!-- end col -->
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <iconify-icon icon="solar:bag-smile-bold-duotone" class="avatar-title fs-32 text-primary"></iconify-icon>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Recent orders</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ last_7_days_orders_count }}</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                        <div class="card-footer py-2 bg-light bg-opacity-50">
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                  <div>
+                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 10.6%</span>
+                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
+                                                  </div>
+                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
+                                             </div>
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div> <!-- end col -->
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <iconify-icon icon="solar:t-shirt-bold-duotone" class="avatar-title text-primary fs-24"></iconify-icon>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Bestselling products</p>
+                                                       <h3 class="text-dark mt-1 mb-0">1</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                        <div class="card-footer py-2 bg-light bg-opacity-50">
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                  <div>
+                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 10.6%</span>
+                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
+                                                  </div>
+                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
+                                             </div>
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div>
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <i class="fs-24 avatar-title text-primary">₹</i>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Total sales (daily/weekly/monthly)</p>
+                                                       <h3 class="text-dark mt-1 mb-0">1</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                        <div class="card-footer py-2 bg-light bg-opacity-50">
+                                             <div class="d-flex align-items-center justify-content-between">
+                                                  <div>
+                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 10.6%</span>
+                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
+                                                  </div>
+                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
+                                             </div>
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div>
+                         </div> <!-- end row -->
+                    </div> <!-- end col -->
+
+                    <div class="col-xxl-7">
+                         <div class="card">
+                              <div class="card-body">
+                                   <div class="d-flex justify-content-between align-items-center">
+                                        <h4 class="card-title">Performance</h4>
+                                        <div>
+                                             <button type="button" class="btn btn-sm btn-outline-light">ALL</button>
+                                             <button type="button" class="btn btn-sm btn-outline-light">1M</button>
+                                             <button type="button" class="btn btn-sm btn-outline-light">6M</button>
+                                             <button type="button" class="btn btn-sm btn-outline-light active">1Y</button>
+                                        </div>
+                                   </div> <!-- end card-title-->
+
+                                   <div dir="ltr">
+                                        <div id="dash-performance-chart" class="apex-charts"></div>
+                                   </div>
+                              </div> <!-- end card body -->
+                         </div> <!-- end card -->
+                    </div> <!-- end col -->
+               </div> <!-- end row -->
+          </div>
+          <!-- End Container Fluid -->
+
+          {% block footer %}
+          <!-- ========== Footer Start ========== -->
+          <footer class="footer">
+              <div class="container-fluid">
+                  <div class="row">
+                      <div class="col-12 text-center">
+                          <script>document.write(new Date().getFullYear())</script> &copy; Aquarium E-Commerce. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                      </div>
+                  </div>
+              </div>
+          </footer>
+          {% endblock footer %}
+          <!-- ========== Footer End ========== -->
+     </div>
+     <!-- ====================================== End Page Content ======================================== -->
+     {% endblock content %}
+</div>
+
+<!-- END Wrapper -->

@@ -1,0 +1,100 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | Edit Book</title>
+{% endblock title %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <form method="post" action="" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Cover Image Upload Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Edit Cover Image</h4>
+                            {% if book.cover_image %}
+                                <div id="file-previews" style="margin-top: 10px;">
+                                    <img src="{{ book.cover_image.url }}" alt="Current Cover Image" style="width: 150px; height: auto; border-radius: 5px;">
+                                </div>
+                            {% endif %}
+                            <input class="form-control mt-3" name="cover_image" type="file" accept="image/*" id="coverImageUpload">
+                            <small class="text-danger invalid-feedback">Please upload a valid image file.</small>
+                        </div>
+                    </div>
+
+                    <!-- General Information Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">General Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Book Title -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Book Title</label>
+                                        <input type="text" name="title" id="title" class="form-control" value="{{ book.title }}" required>
+                                        <small class="text-danger invalid-feedback">Please enter a valid book title.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Author Name -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="author_name" class="form-label">Author Name</label>
+                                        <input type="text" name="author_name" id="author_name" class="form-control" value="{{ book.author_name }}" required>
+                                        <small class="text-danger invalid-feedback">Please enter the author's name.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Book Status -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="status" class="form-label">Status</label>
+                                        <select name="status" class="form-control" id="status" required>
+                                            <option value="1" {% if book.status == 1 %}selected{% endif %}>Published</option>
+                                            <option value="0" {% if book.status == 0 %}selected{% endif %}>Unpublished</option>
+                                        </select>
+                                        <small class="text-danger invalid-feedback">Please select the book's status.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Book File -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <input class="form-control mt-3" name="book_file" type="file" accept=".pdf" id="bookFileUpload">
+                                        <label for="book_file" class="form-label pt-2">Book File (PDF)</label>
+                                        {% if book.book_file %}
+                                            <div style="margin-top: 5px;">
+                                                <a href="{{ book.book_file.url }}" target="_blank" class="btn btn-outline-primary btn-sm">View Current File</a>
+                                            </div>
+                                        {% endif %}
+                                        <small class="text-danger invalid-feedback">Please upload a valid PDF file.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-3 bg-light mb-3 rounded">
+                        <div class="row justify-content-end g-2">
+                            <div class="col-lg-2">
+                                <button type="submit" class="btn btn-outline-secondary w-100">Update</button>
+                            </div>
+                            <div class="col-lg-2">
+                                <a href="{% url 'book_list' %}" class="btn btn-primary w-100">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

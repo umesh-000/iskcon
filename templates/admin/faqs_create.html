@@ -1,0 +1,88 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | FAQ Create</title>
+{% endblock title %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <form method="post" action="">
+                    {% csrf_token %}
+                    
+                    <!-- FAQ Information Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Add FAQ</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Question -->
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label for="question" class="form-label">Question</label>
+                                        <input type="text" name="question" id="question" class="form-control" placeholder="Enter FAQ Question" required>
+                                    </div>
+                                </div>
+
+                                <!-- Answer -->
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label for="answer" class="form-label">Answer</label>
+                                        <textarea name="answer" id="answer" class="form-control" placeholder="Enter FAQ Answer" rows="3" required></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- FAQ's Type -->
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label for="faqs_type" class="form-label">FAQ's Type</label>
+                                        <select name="faqs_type" id="faqs_type" class="form-control" required>
+                                            <option disabled selected value="">Select FAQ's Type</option>
+                                            <option value="about">About</option>
+                                            <option value="popular">Popular</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Is Active -->
+                                <div class="col-lg-12">
+                                    <div class="mb-3 form-check">
+                                        <input type="checkbox" name="is_active" id="is_active" class="form-check-input">
+                                        <label for="is_active" class="form-check-label">Is Active</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-3 bg-light mb-3 rounded">
+                        <div class="row justify-content-end g-2">
+                            <div class="col-lg-2">
+                                <button type="submit" class="btn btn-outline-secondary w-100">Create</button>
+                            </div>
+                            <div class="col-lg-2">
+                                <a href="{% url 'faq_list' %}" class="btn btn-primary w-100">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <script>document.write(new Date().getFullYear())</script> &copy; FAQ Management. Developed by Geega Technologies.
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+{% endblock content %}

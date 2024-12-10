@@ -1,0 +1,107 @@
+{% extends "accounts/login.html" %}
+{% load static %}
+{% block account_title %}
+<title>Mk Aquarium | Account - Sign Up</title>
+{% endblock account_title %} 
+
+{% block accountContent %}
+    <main class="content-wrapper">
+      <!-- Left Section: Form -->
+      <div class="form-section">
+          <div class="form-container">
+              <header class="">
+                <div class="text-center">
+                  <a href="" class="">
+                    <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" alt="Logo" class="img-fluid" style="height: 150px;">
+                  </a>
+                </div>
+
+              </header>
+              <h1 class="h2 mt-auto d-flex justify-content-center pt-3">Create an account</h1>
+              <div class="nav fs-sm mb-3 mb-lg-4 d-flex justify-content-center"> I already have an account
+                <a class="nav-link text-decoration-underline p-0 ms-2" href="{% url 'admin_login' %}">Sign in</a>
+              </div>
+    
+              <!-- Form -->
+          <form class="needs-validation" novalidate="" method="post" action="">
+            {% csrf_token %}
+            <!-- Username Field -->
+            <div class="position-relative mb-4">
+              <label for="register-username" class="form-label">Username</label>
+              <input type="text" class="form-control form-control-lg" id="register-username" placeholder="Enter a username" name="username" required="" />
+              <div class="invalid-tooltip bg-transparent py-0"> Enter a valid username! </div>
+            </div>
+
+            <!-- Email Field -->
+            <div class="position-relative mb-4">
+              <label for="register-email" class="form-label">Email</label>
+              <input 
+                type="email" 
+                class="form-control form-control-lg" 
+                id="register-email" 
+                placeholder="Enter an email" 
+                name="email" 
+                required 
+                pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}" 
+              />
+              <div class="invalid-tooltip bg-transparent py-0">
+                Please enter a valid email address!
+              </div>
+            </div>
+            
+            <!-- Password Field -->
+            <div class="mb-4">
+              <label for="register-password" class="form-label">Password</label>
+              <div class="password-toggle"> 
+                <input 
+                  type="password" 
+                  class="form-control form-control-lg" 
+                  id="register-password" 
+                  minlength="8" 
+                  placeholder="Minimum 8 characters" 
+                  name="password" 
+                  required 
+                />
+                <div class="invalid-tooltip bg-transparent py-0">
+                  Password must be at least 8 characters long!
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-lg btn-primary w-100"> Create an account <i class="ci-chevron-right fs-lg ms-1 me-n1"></i> </button>
+          </form>
+    
+              <footer class="mt-auto">
+                <p class="fs-xs mb-0">
+                  © All rights reserved. Made by <span class="animate-underline"><a class="animate-target text-dark-emphasis text-decoration-none" href="https://geegatechnologies.com/" target="_blank" rel="noreferrer">Geega Technologies</a></span>
+                </p>
+              </footer>
+          </div>
+      </div>
+    </main>
+
+
+
+    <script>
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const form = document.querySelector('.needs-validation');
+        
+        form.addEventListener('submit', (event) => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          
+          form.classList.add('was-validated');
+        });
+      });
+      
+    
+    </script>
+    
+
+
+
+{% endblock accountContent %}

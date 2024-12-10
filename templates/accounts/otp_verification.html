@@ -1,0 +1,41 @@
+{% extends "accounts/login.html" %}
+{% load static %}
+{% block account_title %}
+<title>Aquarium | Account - Recovery</title>
+{% endblock account_title %} 
+
+{% block accountContent %}
+    <main class="content-wrapper">
+      <!-- Left Section: Form -->
+      <div class="form-section">
+          <div class="form-container">
+              <header class="navbar px-0 pb-4 mt-n2 mt-sm-0">
+                  <a href="{% url 'site_home' %}" class="navbar-brand pt-0">
+                      <img src="{% static 'site_assets/img/home/grocery/logo.png' %}" alt="Logo" style="max-width: 100%; height: auto;">
+                  </a>
+              </header>
+              <h1 class="h2 mt-auto">OTP Verification</h1>
+            <p class="pb-2 pb-md-3">Enter the OTP that we sent you when you requested password recovery. We'll use this OTP to verify your identity and proceed with resetting your password.</p>
+    
+            <form class="needs-validation pb-4 mb-3 mb-lg-4" novalidate method="post" action="">
+              {% csrf_token %}
+              <!-- OTP Input -->
+              <div class="position-relative mb-4">
+                  <i class="ci-key position-absolute top-50 start-0 translate-middle-y fs-lg ms-3"></i>
+                  <input type="text" name="otp" class="form-control form-control-lg form-icon-start" placeholder="Enter OTP" required>
+                  <div class="invalid-tooltip bg-transparent py-0">Please enter the OTP you received.</div>
+              </div>
+  
+              <!-- Submit Button -->
+              <button type="submit" class="btn btn-lg btn-primary w-100">Verify OTP</button>
+              </form>
+    
+              <footer class="mt-auto">
+                <p class="fs-xs mb-0">
+                  © All rights reserved. Made by <span class="animate-underline"><a class="animate-target text-dark-emphasis text-decoration-none" href="https://geegatechnologies.com/" target="_blank" rel="noreferrer">Geega Technologies</a></span>
+                </p>
+              </footer>
+          </div>
+      </div>    
+    </main>
+{% endblock accountContent %}

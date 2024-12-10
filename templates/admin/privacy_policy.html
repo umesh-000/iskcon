@@ -1,0 +1,80 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | Blog Create</title>
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <form id="blog-form" action="{% url 'privacy_policy' %}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <!-- General Information Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Privacy Policy</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Blog Title -->
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Title</label>
+                                        <input type="text" value="{{ privacy_policy.title|default:'' }}" name="title" id="title" class="form-control" placeholder="Enter Title" required>
+                                        <small class="text-danger invalid-feedback">Please provide a title for the Privacy Policy.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="col-lg-12">
+                                    <label for="content" class="form-label">Content</label>
+                                    <textarea name="content" id="content" class="form-control" style="display:none;">{{ privacy_policy.content|default:'' }}</textarea>
+                                    <div id="editor"></div>
+                                </div>
+
+                                <div class="col-lg-12">
+                                    <div class="mb-3 mt-3">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="is_active" id="is_active" class="form-check-input" {%if privacy_policy.is_active %}checked{%endif%}>
+                                            <label class="form-check-label" for="is_active">Is Active</label>
+                                        </div>
+                                        <small class="text-danger invalid-feedback">Please confirm the active status.</small>
+                                    </div>
+                                </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-3 bg-light mb-3 rounded">
+                        <div class="row justify-content-end g-2">
+                            <div class="col-lg-2">
+                                <button type="submit" class="btn btn-outline-primary w-100">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+  ClassicEditor.create(document.querySelector("#content"))
+    .then((editor) => {
+      const form = document.querySelector("form");
+      form.addEventListener("submit", (event) => {
+        document.querySelector("#content").value = editor.getData();
+      });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+</script>
+
+{% endblock %}
