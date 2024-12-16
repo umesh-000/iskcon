@@ -99,7 +99,7 @@ class audiosSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = account_models.User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        fields = ['id', 'email', 'first_name', 'last_name']
 
 class CustomerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -108,19 +108,20 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = account_models.Customer
         fields = ['id', 'user', 'profile_image', 'phone_number', 'gender', 'dob', 'status', 'create_at', 'update_at']
 
-
-
 class CustomerUpdateSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = account_models.Customer
-        fields = ['id', 'user', 'profile_image', 'phone_number', 'gender', 'dob', 'status', 'create_at', 'update_at']
+        fields = [ 'id',  'user',  'profile_image',  'phone_number',  'gender',  'dob', 'status', 'create_at', 'update_at']
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
         if user_data:
             user = instance.user
+            email = user_data.get('email')
             for key, value in user_data.items():
                 setattr(user, key, value)
+            if email:
+                user.username = email
             user.save()
         for key, value in validated_data.items():
             setattr(instance, key, value)

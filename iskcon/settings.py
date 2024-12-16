@@ -16,6 +16,7 @@ SECRET_KEY = 'django-insecure-+9$-8^xyxq4ijc*$9x+cvx&%=u2@bi6!-6++xd+dwy33s&#qmk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
+# ALLOWED_HOSTS = ['iskcon.ionenergyinfra.com', 'www.iskcon.ionenergyinfra.com']
 
 
 # Application definition
@@ -82,6 +83,21 @@ DATABASES = {
     }
 }
 
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'iskcon',
+#         'USER': 'iskconuser',
+#         'PASSWORD': 'iskcon@123',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'charset': 'utf8mb4',
+#             'sql_mode': 'STRICT_TRANS_TABLES',
+#         },
+#     }
+# }
 
 
 # Password validation
