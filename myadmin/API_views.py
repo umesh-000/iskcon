@@ -7,11 +7,14 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from datetime import datetime, timedelta
-from .models import Blog,Book,Event,PrivacyPolicy,TermsAndConditions
+from .models import AboutUs, Audio, Blog,Book,Event,PrivacyPolicy,TermsAndConditions, Video
 from django.db import transaction
+from accounts import models as account_models
 from rest_framework import status
 from django.conf import settings
 import logging
+import secrets
+from django.contrib.auth.hashers import make_password
 
 
 
@@ -164,3 +167,172 @@ def terms_and_conditions_view(request):
         return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def about_us_view(request):
+    try:
+        about_us = AboutUs.objects.filter(is_active=True).order_by('-updated_at').first()
+        if not about_us:
+            return Response({'status': 'error', 'message': 'About Us content not found or inactive.'},status=status.HTTP_404_NOT_FOUND)
+        serializer = API_serializers.AboutUsSerializer(about_us, context={'request': request})
+        return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def videos(request):
+    try:
+        videos = Video.objects.filter(status=1).order_by('-created_at')
+        serializer = API_serializers.videosSerializer(videos, many=True)
+        return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def video_details(request, id):
+    try:
+        video = Video.objects.get(id=id, status=1)  # Get video with active status
+        serializer = API_serializers.videosSerializer(video)  # Serialize the video object
+        return Response({
+            'status': 'success',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    except Video.DoesNotExist:
+        return Response({
+            'status': 'error',
+            'message': 'Video not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def audios(request):
+    try:
+        # Fetch all active audios
+        audios = Audio.objects.filter(status=1).order_by('-created_at')
+        # Serialize the audio data
+        serializer = API_serializers.audiosSerializer(audios, many=True)
+        return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Get details of a single audio
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def audios_details(request, id):
+    try:
+        # Fetch audio with given ID and status 1 (active)
+        audio = Audio.objects.get(id=id, status=1)
+        # Serialize the audio object
+        serializer = API_serializers.audiosSerializer(audio)
+        return Response({
+            'status': 'success',
+            'data': serializer.data
+        }, status=status.HTTP_200_OK)
+    except Audio.DoesNotExist:
+        return Response({
+            'status': 'error',
+            'message': 'Audio not found.'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def customerGetProfile(request, customer_id):
+    try:
+        print(customer_id)
+        customer = account_models.Customer.objects.get(id=customer_id, user__user_type='customer')
+        serializer = API_serializers.CustomerSerializer(customer)
+        return Response({ 'status': 'success', 'data': serializer.data }, status=status.HTTP_200_OK)
+    except account_models.Customer.DoesNotExist:
+        return Response({ 'status': 'error', 'message': 'Customer not found' }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def customerUpdate(request, customer_id):
+    try:
+        customer = account_models.Customer.objects.get(id=customer_id, user__user_type='customer')
+        serializer = API_serializers.CustomerUpdateSerializer(customer, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({ 'status': 'success', 'data': serializer.data }, status=status.HTTP_200_OK)
+        return Response({ 'status': 'error', 'errors': serializer.errors }, status=status.HTTP_400_BAD_REQUEST)
+    except account_models.Customer.DoesNotExist:
+        return Response({ 'status': 'error', 'message': 'Customer not found' }, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def resetPassword(request):
+    serializer = API_serializers.ResetPasswordSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data['email']
+        customer_id = serializer.validated_data['customer_id']
+        try:
+            customer = account_models.Customer.objects.select_related('user').get(id=customer_id, user__email=email)
+            user = customer.user
+            new_password = secrets.token_urlsafe(8)
+            user.password = make_password(new_password)
+            user.save()
+            # Send password reset email
+            subject = "Password Reset Request"
+            message = (
+                f"Dear {user.first_name} {user.last_name},\n\n"
+                f"Your password has been successfully reset. Your new password is:\n\n"
+                f"{new_password}\n\n"
+                "Please log in and change your password immediately for security purposes.\n\n"
+                "Thank you."
+            )
+            from_email = "no-reply@example.com"
+            recipient_list = [email]
+            # Uncomment this line after configuring email settings in Django
+            # send_mail(subject, message, from_email, recipient_list)
+            return Response(
+                {
+                    "status": "success",
+                    "message": "A new password has been sent to the provided email.",
+                    "new_password": new_password,  # Optional: Include this only for debugging (remove in production)
+                }, status=status.HTTP_200_OK,
+            )
+        except account_models.Customer.DoesNotExist:
+            return Response( {"status": "error", "message": "No customer found with the provided email and ID."}, status=status.HTTP_404_NOT_FOUND, )
+    return Response({"status": "error", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def customersDelete(request):
+    try:
+        customer_id = request.data.get('customer_id')
+        if not customer_id:
+            return Response({ 'status': 'error', 'message': 'Customer ID is required.' }, status=status.HTTP_400_BAD_REQUEST)
+        with transaction.atomic():
+            customer = account_models.Customer.objects.get(id=customer_id)
+            user = customer.user
+            customer.delete()
+            user.delete()
+        return Response({ 'status': 'success','message': f'Customer and associated user with ID {customer_id} deleted successfully.' }, status=status.HTTP_200_OK)
+    except account_models.Customer.DoesNotExist:
+        return Response({ 'status': 'error', 'message': 'Customer not found.' }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({ 'status': 'error', 'message': str(e) }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

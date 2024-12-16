@@ -309,6 +309,25 @@
                      </li> 
 
 
+                     <li class="nav-item">
+                         <a class="nav-link" href="{% url 'video_list' %}">
+                             <span class="nav-icon">
+                                 <iconify-icon icon="mdi:video"></iconify-icon>
+                             </span>
+                             <span class="nav-text"> Videos </span>
+                         </a>
+                     </li>  
+
+
+                     <li class="nav-item">
+                         <a class="nav-link" href="{% url 'audio_list' %}">
+                             <span class="nav-icon">
+                                 <iconify-icon icon="mdi:music-note"></iconify-icon>
+                             </span>
+                             <span class="nav-text"> Audio </span>
+                         </a>
+                     </li>
+
 
                     <li class="nav-item">
                          <a class="nav-link" href="{% url 'event_list' %}">
@@ -329,6 +348,9 @@
                          <div class="collapse" id="sidebarProducts">
                               <ul class="nav sub-navbar-nav">
                                    <li class="sub-nav-item">
+                                        <a class="sub-nav-link" href="{% url "about_us" %}">About us</a>
+                                   </li>
+                                   <li class="sub-nav-item">
                                         <a class="sub-nav-link" href="{% url "privacy_policy" %}">Privacy Policy</a>
                                    </li>
                                    <li class="sub-nav-item">
@@ -344,6 +366,16 @@
                                  <iconify-icon icon="mdi:bell-ring-outline"></iconify-icon>
                              </span>
                              <span class="nav-text"> Notifications </span>
+                         </a>
+                     </li>
+
+
+                     <li class="nav-item">
+                         <a class="nav-link" href="{% url 'customer_list' %}">
+                             <span class="nav-icon">
+                                 <iconify-icon icon="mdi:bell-ring-outline"></iconify-icon>
+                             </span>
+                             <span class="nav-text"> User </span>
                          </a>
                      </li>
 

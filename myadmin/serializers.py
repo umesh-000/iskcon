@@ -77,3 +77,63 @@ class TermsAndConditionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = admin_models.TermsAndConditions
         fields = ('id', 'title', 'content', 'is_active', 'created_at', 'updated_at')
+
+class AboutUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = admin_models.AboutUs
+        fields = ('id', 'title', 'content', 'is_active', 'created_at', 'updated_at')
+        
+
+class videosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = admin_models.Video
+        fields = '__all__' 
+
+
+class audiosSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = admin_models.Audio
+        fields = '__all__' 
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = account_models.User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+class CustomerSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = account_models.Customer
+        fields = ['id', 'user', 'profile_image', 'phone_number', 'gender', 'dob', 'status', 'create_at', 'update_at']
+
+
+
+class CustomerUpdateSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = account_models.Customer
+        fields = ['id', 'user', 'profile_image', 'phone_number', 'gender', 'dob', 'status', 'create_at', 'update_at']
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            user = instance.user
+            for key, value in user_data.items():
+                setattr(user, key, value)
+            user.save()
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    customer_id = serializers.IntegerField()
+    def validate(self, data):
+        email = data.get('email')
+        customer_id = data.get('customer_id')
+        if not account_models.Customer.objects.filter(id=customer_id, user__email=email, user__user_type='customer').exists():
+            raise serializers.ValidationError("No customer found with this email and customer ID.")
+        return data

@@ -1,11 +1,14 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db import transaction
 from myadmin import models
+from accounts import models as account_models
 import logging
 
 # Set up logging
@@ -259,6 +262,41 @@ def event_delete(request, id):
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def about_us(request):
+    about_us = models.AboutUs.objects.first()  # Fetch the first About Us record
+
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        is_active = request.POST.get('is_active', 'off') == 'on'
+        
+        try:
+            if about_us:
+                # Update existing About Us record
+                about_us.title = title
+                about_us.content = content
+                about_us.is_active = is_active
+                about_us.save()
+                messages.success(request, 'About Us updated successfully.')
+            else:
+                # Create a new About Us record if none exists
+                models.AboutUs.objects.create(title=title, content=content, is_active=is_active)
+                messages.success(request, 'About Us created successfully.')
+            return redirect('about_us')
+        except Exception as e:
+            messages.error(request, f'Error saving About Us: {str(e)}')
+            return redirect('about_us')
+
+    context = {
+        'about_us': about_us,
+    }
+    return render(request, 'admin/about_us.html', context)
+
+
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def privacy_policy(request):
@@ -319,11 +357,6 @@ def terms_and_conditions(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def notifications(request):
-    pass
-
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
-@login_required
-def notifications(request):
     notifications_list = models.Notification.objects.filter(is_active=True).order_by('-created_at')
     return render(request, 'admin/notifications_list.html', {'notifications': notifications_list})
 
@@ -332,12 +365,286 @@ def notifications(request):
 def notification_create(request):
     if request.method == 'POST':
         title = request.POST.get('title')
-        description = request.POST.get('description')
-        status = request.POST.get('status')
+        message = request.POST.get('message')
+        is_active = request.POST.get('is_active')
         try:
-            models.Notification.objects.create(title=title,description=description,status=status,)
+            models.Notification.objects.create(title=title,message=message,status=is_active,)
             messages.success(request, "Notification created successfully!")
             return redirect('notifications')
         except Exception as e:
             messages.error(request, f"Error creating notification: {str(e)}")
     return render(request, 'admin/notification_create.html')
+
+
+
+
+# video
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def video_list(request):
+    videos = models.Video.objects.all().order_by('-created_at')
+    paginator = Paginator(videos, 10)  # 10 videos per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'videos': page_obj,
+    }
+    return render(request, 'admin/video_list.html', context)
+
+# Create a new video
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def video_create(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        author = request.POST.get('author')
+        description = request.POST.get('description')
+        video_file = request.FILES.get('videoFile')
+        thumbnail = request.FILES.get('thumbnail')
+        video_url = request.POST.get('video_url')
+        status = request.POST.get('status')
+
+        try:
+            video = models.Video.objects.create(
+                uploaded_by=request.user,
+                title=title,
+                author=author,
+                description=description,
+                video_file=video_file,
+                thumbnail=thumbnail,
+                video_url=video_url,
+                status=status,
+            )
+            messages.success(request, "Video created successfully!")
+            return redirect('video_list')
+        except Exception as e:
+            messages.error(request, f"Error creating video: {str(e)}")
+    return render(request, 'admin/video_create.html')
+
+# Edit an existing video
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def video_edit(request, id):
+    video = get_object_or_404(models.Video, id=id)
+    if request.method == 'POST':
+        video.title = request.POST.get('title')
+        video.author = request.POST.get('author')
+        video.description = request.POST.get('description')
+        video.video_url = request.POST.get('video_url')
+        video.status = request.POST.get('status')
+
+
+        if request.FILES.get('thumbnail'):
+            video.thumbnail = request.FILES['thumbnail']
+        if request.FILES.get('videoFile'):
+            video.video_file = request.FILES['videoFile']
+        
+        try:
+            video.save()
+            messages.success(request, "Video updated successfully!")
+            return redirect('video_list')
+        except Exception as e:
+            messages.error(request, f"Error updating video: {str(e)}")
+    
+    context = {
+        'video': video,
+    }
+    return render(request, 'admin/video_edit.html', context)
+
+# Delete a video
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def video_delete(request, id):
+    if request.method == 'POST':
+        try:
+            video = get_object_or_404(models.Video, id=id)
+            video.delete()
+            messages.success(request, "Video deleted successfully!")
+            return JsonResponse({'success': True, 'message': 'Video deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def audio_list(request):
+    audios = models.Audio.objects.all().order_by('-created_at')
+    paginator = Paginator(audios, 10)  # 10 audio tracks per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'audios': page_obj,
+    }
+    return render(request, 'admin/audio_list.html', context)
+
+# Create a new audio track
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def audio_create(request):
+    if request.method == 'POST':
+        track_name = request.POST.get('title')
+        artist_name = request.POST.get('artist')
+        status = request.POST.get('status')
+        thumbnail = request.FILES.get('thumbnail')
+        track_file = request.FILES.get('track_file')
+
+        try:
+            audio = models.Audio.objects.create(
+                uploaded_by=request.user,
+                title=track_name,
+                artist=artist_name,
+                track_file=track_file,
+                thumbnail=thumbnail,
+                # duration=5,
+                status=status,
+            )
+            messages.success(request, "Audio track created successfully!")
+            return redirect('audio_list')
+        except Exception as e:
+            messages.error(request, f"Error creating audio track: {str(e)}")
+    return render(request, 'admin/audio_create.html')
+
+# Edit an existing audio track
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def audio_edit(request, id):
+    audio = get_object_or_404(models.Audio, id=id)
+    if request.method == 'POST':
+        audio.title = request.POST.get('title')
+        audio.artist = request.POST.get('artist')
+        audio.duration = request.POST.get('duration')
+        audio.status = request.POST.get('status')
+
+        if request.FILES.get('thumbnail'):
+            audio.thumbnail = request.FILES['thumbnail']
+        if request.FILES.get('track_file'):
+            audio.track_file = request.FILES['track_file']
+        
+        try:
+            audio.save()
+            messages.success(request, "Audio track updated successfully!")
+            return redirect('audio_list')
+        except Exception as e:
+            messages.error(request, f"Error updating audio track: {str(e)}")
+    
+    context = {
+        'audio': audio,
+    }
+    return render(request, 'admin/audio_edit.html', context)
+
+# Delete an audio track
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def audio_delete(request, id):
+    if request.method == 'POST':
+        try:
+            audio = get_object_or_404(models.Audio, id=id)
+            audio.delete()
+            messages.success(request, "Audio track deleted successfully!")
+            return JsonResponse({'success': True, 'message': 'Audio track deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def customer_list(request):
+    customers = account_models.Customer.objects.filter(user__user_type='customer').order_by('-create_at')
+    paginator = Paginator(customers, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'customers': page_obj,
+    }
+    return render(request, 'admin/customer_list.html', context)
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def customer_create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        name_parts = name.split()
+        first_name = name_parts[0] if len(name_parts) > 0 else ''
+        last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+        phone_number = request.POST.get('phone_number')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        gender = request.POST.get('gender')
+        dob = request.POST.get('dob')
+        status = request.POST.get('status')
+        profile_image = request.FILES.get('profile_image')
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(username=email,email=email,password=make_password(password),first_name=first_name,last_name=last_name,user_type='customer')
+                account_models.Customer.objects.create(user=user,phone_number=phone_number,gender=gender,dob=dob,status=status,profile_image=profile_image)
+            messages.success(request, "Customer created successfully!")
+            return redirect('customer_list')
+        except Exception as e:
+            messages.error(request, f"Error creating customer: {str(e)}")
+    return render(request, 'admin/customer_create.html')                            
+
+
+# Edit Customer
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def customer_edit(request, id):
+    customer = get_object_or_404(account_models.Customer, id=id)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        name_parts = name.split()
+        first_name = name_parts[0] if len(name_parts) > 0 else ''
+        last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+        customer.user.first_name = first_name
+        customer.user.last_name = last_name
+        customer.phone_number = request.POST.get('phone_number')
+        customer.gender = request.POST.get('gender')
+        customer.dob = request.POST.get('dob')
+        customer.status = request.POST.get('status')
+        customer.user.email = request.POST.get('email')
+
+        password = request.POST.get('password')
+
+        if password:
+            customer.user.password = make_password(password)
+        if request.FILES.get('profile_image'):
+            customer.profile_image = request.FILES['profile_image']
+
+        try:
+            customer.save()
+            customer.user.save()
+            messages.success(request, "Customer updated successfully!")
+            return redirect('customer_list')
+        except Exception as e:
+            messages.error(request, f"Error updating customer: {str(e)}")
+
+    context = {
+        'customer': customer,
+    }
+    return render(request, 'admin/customer_edit.html', context)
+
+
+# Delete Customer
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def customer_delete(request, id):
+    if request.method == 'POST':
+        try:
+            customer = get_object_or_404(account_models.Customer, id=id)
+            customer.delete()
+            customer.user.delete()
+            messages.success(request, "Customer deleted successfully!")
+            return JsonResponse({'success': True, 'message': 'Customer deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+

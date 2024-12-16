@@ -38,28 +38,3 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name} - {self.user.email}"
-
-# Customer address book
-class AddressBook(models.Model):
-    
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='address_book')
-    name = models.CharField(max_length=255, blank=True, null=True) 
-    mobile_no = models.CharField(max_length=15, blank=True, null=True)
-    address_type = models.CharField(max_length=10, blank=True, null=True)
-    address_line_1 = models.CharField(max_length=255)
-    address_line_2 = models.CharField(max_length=255, blank=True, null=True)
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    postal_code = models.CharField(max_length=20, blank=True, null=True)
-    country = models.CharField(max_length=100)
-    is_default = models.BooleanField(default=False)
-    class Meta:
-        db_table = 'customer_address_book'
-        unique_together = ('customer', 'address_type', 'is_default')
-    def save(self, *args, **kwargs):
-        with transaction.atomic():
-            if self.is_default:
-                AddressBook.objects.filter(customer=self.customer, address_type=self.address_type, is_default=True).update(is_default=False)
-            super().save(*args, **kwargs)
-    def __str__(self):
-        return f"{self.address_type.capitalize()} address for {self.customer.user.email}"

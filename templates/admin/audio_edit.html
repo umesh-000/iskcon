@@ -1,0 +1,148 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | Edit Audio</title>
+{% endblock title %}
+
+{% block content %}
+
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <form id="audio-form" action="{% url 'audio_edit' audio.id %}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Audio Thumbnail Upload Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Edit Audio Thumbnail</h4>
+                            {% if audio.thumbnail %}
+                                <div>
+                                    <img src="{{ audio.thumbnail.url }}" alt="Thumbnail" style="width: 150px; margin-top: 20px;">
+                                </div>
+                            {% endif %}
+                            <div id="file-previews" style="display: flex; flex-wrap: wrap; margin-top: 10px;"></div>
+                            <input class="form-control mt-3" name="thumbnail" type="file" accept="image/*" id="thumbnailUpload">
+                            <small class="text-danger invalid-feedback">Please upload a valid image for the thumbnail.</small>
+                        </div>
+                    </div>
+
+                    <!-- General Information Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">General Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Track Name -->
+                                <div class="col-lg-4">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Track Name</label>
+                                        <input type="text" name="title" id="title" class="form-control" value="{{ audio.title }}" required>
+                                        <small class="text-danger invalid-feedback">Please provide a name for the track.</small>
+                                    </div>
+                                </div>
+
+                                <!-- Artist Name -->
+                                <div class="col-lg-4">
+                                    <div class="mb-3">
+                                        <label for="artist" class="form-label">Artist Name</label>
+                                        <input type="text" name="artist" id="artist" class="form-control" value="{{ audio.artist }}">
+                                        {% comment %} <small class="text-muted">Optional</small> {% endcomment %}
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-lg-4">
+                                    <div class="mb-1">
+                                        <label for="status" class="form-label">Status</label>
+                                        <select name="status" class="form-control" id="status" required>
+                                            <option value="1" {% if audio.status == 1 %}selected{% endif %}>Published</option>
+                                            <option value="0" {% if audio.status == 0 %}selected{% endif %}>Unpublished</option>
+                                        </select>
+                                        <small class="text-danger invalid-feedback">Please select a status for the track.</small>
+                                    </div>
+                                </div>
+
+                                {% comment %} <!-- Description -->
+                                <div class="col-lg-12">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea name="description" id="description" class="form-control" style="display:none;">{{ audio.description }}</textarea>
+                                    <div id="editor"></div>
+                                </div> {% endcomment %}
+
+                                <!-- Upload Track File -->
+                                <div class="col-lg-12">
+                                    <div class="mb-1">
+                                        <label for="trackFile" class="form-label">Upload Track File</label>
+                                        {% if audio.track_file %}
+                                            <div id="audioPreview" style="margin-top: 0px;">
+                                                <audio id="audioPlayer" controls>
+                                                    <source src="{{ audio.track_file.url }}" type="audio/mpeg">
+                                                    Your browser does not support the audio tag.
+                                                </audio>
+                                            </div>
+                                        {% endif %}
+                                        <input class="form-control mt-1" type="file" name="track_file" id="trackFile" accept="audio/*">
+                                        <small class="text-danger invalid-feedback">Please upload an audio file.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-3 bg-light mb-3 rounded">
+                        <div class="row justify-content-end g-2">
+                            <div class="col-lg-2">
+                                <button type="submit" class="btn btn-outline-secondary w-100">Save Changes</button>
+                            </div>
+                            <div class="col-lg-2">
+                                <a href="{% url 'audio_list' %}" class="btn btn-primary w-100">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize the CKEditor for the description field
+    ClassicEditor
+        .create(document.querySelector('#editor'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote']
+        })
+        .then(editor => {
+            // Set the initial content of the editor
+            editor.setData(document.querySelector('#description').value);
+
+            // Update the hidden input value when the content changes
+            editor.model.document.on('change:data', () => {
+                document.querySelector('#description').value = editor.getData();
+            });
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+    // Audio file preview functionality
+    document.getElementById('trackFile').addEventListener('change', function(event) {
+        var audioFile = event.target.files[0];
+        if (audioFile) {
+            var audioURL = URL.createObjectURL(audioFile);
+            var audioPlayer = document.getElementById('audioPlayer');
+            var audioSource = audioPlayer.querySelector('source');
+
+            // Set the audio URL for preview
+            audioSource.src = audioURL;
+            document.getElementById('audioPreview').style.display = 'block'; // Show the audio player
+            audioPlayer.load(); // Load the audio
+        }
+    });
+</script>
+
+{% endblock %}
