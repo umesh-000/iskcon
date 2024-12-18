@@ -1,15 +1,24 @@
 from django.shortcuts import redirect, render, get_object_or_404
+from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth import get_user_model
+from accounts import models as account_models
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db import transaction
+from mutagen.mp3 import MP3
+from mutagen.wave import WAVE
 from myadmin import models
-from accounts import models as account_models
+import datetime
 import logging
+import os
+
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -18,25 +27,150 @@ User = get_user_model()
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def admin_dashboard(request):
-    # if not request.admin_user:
-    #     return redirect('login')
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
     
-    # # Dashboard data aggregations
-    # total_customers = account_models.Customer.objects.count()
-    # total_orders = account_models.OrderHistory.objects.count()
-    # total_revenue = account_models.OrderHistory.objects.aggregate(total_revenue=Sum('total_amount'))['total_revenue'] or 0
-    # seven_days_ago = timezone.now() - timedelta(days=7)
-    # last_7_days_orders_count = account_models.OrderHistory.objects.filter(order_date__gte=seven_days_ago).count()
+    # Dashboard data aggregations
+    all_users = account_models.User.objects.count()
+    total_customers = account_models.Customer.objects.count()
+    total_blog_categories = models.BlogCategory.objects.count()
+    total_blogs = models.Blog.objects.count()
+    total_books = models.Book.objects.count()
+    total_videos = models.Video.objects.count()
+    total_events = models.Event.objects.count()
+    total_audios = models.Audio.objects.count()
+    total_galleries = models.Gallery.objects.count()
     context = {
-        # 'admin_user': request.admin_user,
-        # 'total_customers': total_customers,
-        # 'total_orders': total_orders,
-        # 'total_revenue': total_revenue,
-        # 'last_7_days_orders_count': last_7_days_orders_count,
-
+        'admin_user': request.user,
+        'all_users' : all_users,
+        'total_customers': total_customers,
+        'total_blog_categories': total_blog_categories,
+        'total_blogs':total_blogs,
+        'total_books':total_books,
+        'total_videos':total_videos,
+        'total_events':total_events,
+        'total_audios':total_audios,
+        'total_galleries' : total_galleries,
     }
-
     return render(request, 'admin/dashboard.html', context)
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def admin_profile_details(request, id):
+    admin_profile = get_object_or_404(account_models.Admins, user_id=id)
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
+    
+    if request.method == "POST":
+        profile_image = request.FILES.get('profile_image')
+        if profile_image:
+            admin_profile.profile_image = profile_image
+            admin_profile.save()
+            messages.success(request, "Profile Image Updated!")
+
+    context = {
+        'admin_user': request.user,
+        'admin_profile': admin_profile,
+    }
+    return render(request, 'admin/admin_profile.html', context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def admin_change_password(request, id):
+    if not request.user.is_authenticated:
+        return redirect('admin_login')
+    admin_profile = get_object_or_404(account_models.Admins, id=id)
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_new_password = request.POST.get('confirm_new_password')
+        user = admin_profile.user
+        if not check_password(current_password, user.password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect('admin_profile_details', id=id)
+        if new_password != confirm_new_password:
+            messages.error(request, 'New password and confirmation do not match.')
+            return redirect('admin_profile_details', id=id)
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, 'Password updated successfully.')
+        return redirect('admin_profile_details', id=id)
+    context = {
+        'admin_user': request.user,
+        'admin_profile': admin_profile,
+    }
+    return render(request, 'admin/admin_profile.html', context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def blog_categories_list(request):
+    categories = models.BlogCategory.objects.all().order_by('-created_at')
+    paginator = Paginator(categories, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'admin_user': request.user,
+        'categories': page_obj,
+    }
+    return render(request, 'admin/blog_categories_list.html', context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def blog_categories_create(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        is_active = request.POST.get('is_active') == 'on'
+        try:
+            models.BlogCategory.objects.create( name=name, description=description, is_active=is_active, )
+            messages.success(request, "Blog category created successfully!")
+            return redirect('blog_categories_list')
+        except Exception as e:
+            messages.error(request, f"Error creating category: {str(e)}")
+    context = {
+        'admin_user': request.user,
+    }
+    return render(request, 'admin/blog_categories_create.html',context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def blog_categories_edit(request, id):
+    category = get_object_or_404(models.BlogCategory, id=id)
+    if request.method == 'POST':
+        category.name = request.POST.get('name')
+        category.description = request.POST.get('description')
+        category.is_active = request.POST.get('is_active') == 'on'
+        
+        try:
+            category.save()
+            messages.success(request, "Blog category updated successfully!")
+            return redirect('blog_categories_list')
+        except Exception as e:
+            messages.error(request, f"Error updating category: {str(e)}")
+    
+    context = {
+        'admin_user': request.user,
+        'category': category,
+    }
+    return render(request, 'admin/blog_categories_edit.html', context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def blog_categories_delete(request, id):
+    if request.method == 'POST':
+        try:
+            category = get_object_or_404(models.BlogCategory, id=id)
+            category.delete()
+            messages.success(request, "Blog category deleted successfully!")
+            return JsonResponse({'success': True, 'message': 'Category deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -46,8 +180,8 @@ def blog_list(request):
     paginator = Paginator(blogs, 10)  # 10 blogs per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
     context = {
+        'admin_user': request.user,
         'blogs': page_obj,
     }
     return render(request, 'admin/blog_list.html', context)
@@ -55,17 +189,20 @@ def blog_list(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def blog_create(request):
+    blog_categories = models.BlogCategory.objects.filter(is_active=True)
     if request.method == 'POST':
         title = request.POST.get('title')
+        category_id = request.POST.get('category_id')
         subtitle = request.POST.get('subtitle')
         description = request.POST.get('description')
         status = request.POST.get('status')
         image = request.FILES.get('image')
-
+        category = get_object_or_404(models.BlogCategory, id=category_id)
         try:
             blog = models.Blog.objects.create(
                 added_by=request.user,
                 title=title,
+                category = category,
                 subtitle=subtitle,
                 description=description,
                 status=status,
@@ -75,18 +212,28 @@ def blog_create(request):
             return redirect('blog_list')
         except Exception as e:
             messages.error(request, f"Error creating blog: {str(e)}")
-    return render(request, 'admin/blog_create.html')
+    context = {   
+        'admin_user': request.user,
+        "blog_categories":blog_categories,
+    }
+    return render(request, 'admin/blog_create.html',context)
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def blog_edit(request, id):
+    blog_categories = models.BlogCategory.objects.filter(is_active=True)
     blog = get_object_or_404(models.Blog, id=id)
     if request.method == 'POST':
         blog.title = request.POST.get('title')
         blog.subtitle = request.POST.get('subtitle')
-        blog.description = request.POST.get('description')  # CKEditor content
+        blog.description = request.POST.get('description')
         blog.status = request.POST.get('status')
+        category_id = request.POST.get('category_id')
+        print(category_id)
+        if category_id:
+            category = get_object_or_404(models.BlogCategory, id=category_id)
+            blog.category = category
         if request.FILES.get('image'):
             blog.image = request.FILES['image']
         try:
@@ -96,7 +243,9 @@ def blog_edit(request, id):
         except Exception as e:
             messages.error(request, f"Error updating blog: {str(e)}")
     context = {
+        'admin_user': request.user,
         'blog': blog,
+        "blog_categories":blog_categories,
     }
     return render(request, 'admin/blog_edit.html', context)
 
@@ -124,6 +273,7 @@ def book_list(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
+        'admin_user': request.user,
         'books': page_obj,
     }
     return render(request, 'admin/book_list.html', context)
@@ -144,7 +294,10 @@ def book_create(request):
             return redirect('book_list') 
         except Exception as e:
             messages.error(request, f"Error creating book: {str(e)}")
-    return render(request, 'admin/book_create.html')
+    context = {
+        'admin_user': request.user,
+    }
+    return render(request, 'admin/book_create.html', context)
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -167,6 +320,7 @@ def book_edit(request, id):
         except Exception as e:
             messages.error(request, f"Error updating book: {str(e)}")
     context = {
+        'admin_user': request.user,
         'book': book,
     }
     return render(request, 'admin/book_edit.html', context)
@@ -196,6 +350,7 @@ def event_list(request):
     page_obj = paginator.get_page(page_number)
 
     context = {
+        'admin_user': request.user,
         'events': page_obj,
     }
     return render(request, 'admin/event_list.html', context)
@@ -206,8 +361,10 @@ def event_list(request):
 def event_create(request):
     if request.method == 'POST':
         title = request.POST.get('title')
+        address = request.POST.get('address')
         description = request.POST.get('description')
         venue = request.POST.get('venue')
+        event_datetime = request.POST.get('event_datetime')
         status = request.POST.get('status')
         event_image = request.FILES.get('event_image')
 
@@ -216,6 +373,8 @@ def event_create(request):
                 title=title,
                 image=event_image,
                 description=description,
+                address = address,
+                event_datetime=event_datetime,
                 venue=venue,
                 status=status,
             )
@@ -223,8 +382,8 @@ def event_create(request):
             return redirect('event_list')
         except Exception as e:
             messages.error(request, f"Error creating event: {str(e)}")
-
-    return render(request, 'admin/event_create.html')
+    context = {'admin_user': request.user,}
+    return render(request, 'admin/event_create.html',context)
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -234,7 +393,9 @@ def event_edit(request, id):
     if request.method == 'POST':
         event.title = request.POST.get('title')
         event.description = request.POST.get('description')
+        event.address = request.POST.get('address')
         event.venue = request.POST.get('venue')
+        event.event_datetime = request.POST.get('event_datetime')
         event.status = request.POST.get('status')
         if request.FILES.get('image'):
             event.image = request.FILES.get('image')
@@ -244,7 +405,7 @@ def event_edit(request, id):
             return redirect('event_list')
         except Exception as e:
             messages.error(request, f"Error updating event: {str(e)}")
-    context = {'event': event,}
+    context = {'event': event,'admin_user': request.user,}
     return render(request, 'admin/event_edit.html', context)
 
 
@@ -266,31 +427,36 @@ def event_delete(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def about_us(request):
-    about_us = models.AboutUs.objects.first()  # Fetch the first About Us record
+    about_us = models.AboutUs.objects.first()
 
     if request.method == 'POST':
         title = request.POST.get('title')
         content = request.POST.get('content')
         is_active = request.POST.get('is_active', 'off') == 'on'
-        
+        thumbnail = request.FILES.get('thumbnail')
         try:
             if about_us:
-                # Update existing About Us record
                 about_us.title = title
                 about_us.content = content
                 about_us.is_active = is_active
+                if thumbnail:
+                    about_us.image = thumbnail
+                else:
+                    pass
                 about_us.save()
                 messages.success(request, 'About Us updated successfully.')
             else:
-                # Create a new About Us record if none exists
-                models.AboutUs.objects.create(title=title, content=content, is_active=is_active)
+                if thumbnail:
+                    models.AboutUs.objects.create(title=title,content=content,is_active=is_active,image=thumbnail)
+                else:
+                    models.AboutUs.objects.create(title=title,content=content,is_active=is_active,image=None)
                 messages.success(request, 'About Us created successfully.')
             return redirect('about_us')
         except Exception as e:
             messages.error(request, f'Error saving About Us: {str(e)}')
             return redirect('about_us')
-
     context = {
+        'admin_user': request.user,
         'about_us': about_us,
     }
     return render(request, 'admin/about_us.html', context)
@@ -320,6 +486,7 @@ def privacy_policy(request):
             messages.error(request, f'Error saving Privacy Policy: {str(e)}')
             return redirect('privacy_policy')
     context = {
+        'admin_user': request.user,
         'privacy_policy': privacy_policy,
     }
     return render(request, 'admin/privacy_policy.html', context)
@@ -349,6 +516,7 @@ def terms_and_conditions(request):
             return redirect('terms_and_conditions')
 
     context = {
+        'admin_user': request.user,
         'terms_and_conditions': terms_and_conditions,
     }
     return render(request, 'admin/terms_and_conditions.html', context)
@@ -358,25 +526,41 @@ def terms_and_conditions(request):
 @login_required
 def notifications(request):
     notifications_list = models.Notification.objects.filter(is_active=True).order_by('-created_at')
-    return render(request, 'admin/notifications_list.html', {'notifications': notifications_list})
+    return render(request, 'admin/notifications_list.html', {'notifications': notifications_list,'admin_user': request.user,})
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def notification_create(request):
     if request.method == 'POST':
         title = request.POST.get('title')
+        target_audience = request.POST.get('target_audience')
         message = request.POST.get('message')
-        is_active = request.POST.get('is_active')
+        is_active = request.POST.get('is_active', 'off') == 'on'
+        image = request.FILES.get('notification_image')
         try:
-            models.Notification.objects.create(title=title,message=message,status=is_active,)
+            models.Notification.objects.create(title=title, target_audience=target_audience, message=message, image=image, is_active=is_active,)
             messages.success(request, "Notification created successfully!")
             return redirect('notifications')
         except Exception as e:
             messages.error(request, f"Error creating notification: {str(e)}")
-    return render(request, 'admin/notification_create.html')
+    context = {
+        'admin_user': request.user,
+    }
+    return render(request, 'admin/notification_create.html',context)
 
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def notification_delete(request, id):
+    if request.method == 'POST':
+        try:
+            notification = get_object_or_404(models.Notification, id=id)
+            notification.delete()
+            messages.success(request, "Notification Delete successfully!")
+            return JsonResponse({'success': True, 'message': 'Notification deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 # video
 
@@ -389,6 +573,7 @@ def video_list(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
+        'admin_user': request.user,
         'videos': page_obj,
     }
     return render(request, 'admin/video_list.html', context)
@@ -421,7 +606,10 @@ def video_create(request):
             return redirect('video_list')
         except Exception as e:
             messages.error(request, f"Error creating video: {str(e)}")
-    return render(request, 'admin/video_create.html')
+    context = {
+        'admin_user': request.user,
+    }
+    return render(request, 'admin/video_create.html',context)
 
 # Edit an existing video
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
@@ -449,6 +637,7 @@ def video_edit(request, id):
             messages.error(request, f"Error updating video: {str(e)}")
     
     context = {
+        'admin_user': request.user,
         'video': video,
     }
     return render(request, 'admin/video_edit.html', context)
@@ -479,11 +668,12 @@ def audio_list(request):
     page_obj = paginator.get_page(page_number)
     
     context = {
+        'admin_user': request.user,
         'audios': page_obj,
     }
     return render(request, 'admin/audio_list.html', context)
 
-# Create a new audio track
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def audio_create(request):
@@ -493,24 +683,35 @@ def audio_create(request):
         status = request.POST.get('status')
         thumbnail = request.FILES.get('thumbnail')
         track_file = request.FILES.get('track_file')
-
+        duration_seconds = 0
         try:
+            if track_file:
+                temp_file_path = track_file.temporary_file_path() if isinstance(track_file, TemporaryUploadedFile) else None
+                if track_file.name.lower().endswith('.mp3'):
+                    audio_data = MP3(track_file if not temp_file_path else temp_file_path)
+                    duration_seconds = round(audio_data.info.length)
+                elif track_file.name.lower().endswith('.wav'):
+                    audio_data = WAVE(track_file if not temp_file_path else temp_file_path)
+                    duration_seconds = round(audio_data.info.length)
+                else:
+                    messages.error(request, "Unsupported audio format. Only MP3 and WAV are supported.")
+                    return redirect('audio_create')
+            duration_minutes = round(duration_seconds / 60, 2)
             audio = models.Audio.objects.create(
-                uploaded_by=request.user,
-                title=track_name,
-                artist=artist_name,
-                track_file=track_file,
-                thumbnail=thumbnail,
-                # duration=5,
-                status=status,
-            )
+                uploaded_by=request.user, title=track_name, artist=artist_name, track_file=track_file, 
+                thumbnail=thumbnail, duration=duration_seconds,  status=status, )
             messages.success(request, "Audio track created successfully!")
             return redirect('audio_list')
         except Exception as e:
             messages.error(request, f"Error creating audio track: {str(e)}")
+    context = {
+        'admin_user': request.user,
+    }
     return render(request, 'admin/audio_create.html')
 
-# Edit an existing audio track
+
+
+
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def audio_edit(request, id):
@@ -518,24 +719,36 @@ def audio_edit(request, id):
     if request.method == 'POST':
         audio.title = request.POST.get('title')
         audio.artist = request.POST.get('artist')
-        audio.duration = request.POST.get('duration')
         audio.status = request.POST.get('status')
-
         if request.FILES.get('thumbnail'):
             audio.thumbnail = request.FILES['thumbnail']
         if request.FILES.get('track_file'):
-            audio.track_file = request.FILES['track_file']
-        
+            track_file = request.FILES['track_file']
+            duration_seconds = 0
+            try:
+                temp_file_path = track_file.temporary_file_path() if isinstance(track_file, TemporaryUploadedFile) else None
+                if track_file.name.lower().endswith('.mp3'):
+                    audio_data = MP3(track_file if not temp_file_path else temp_file_path)
+                    duration_seconds = round(audio_data.info.length)
+                elif track_file.name.lower().endswith('.wav'):
+                    audio_data = WAVE(track_file if not temp_file_path else temp_file_path)
+                    duration_seconds = round(audio_data.info.length)
+                else:
+                    messages.error(request, "Unsupported audio format. Only MP3 and WAV are supported.")
+                    return redirect('audio_edit', id=id)
+                audio.track_file = track_file
+                audio.duration = duration_seconds
+                print(f"New duration: {duration_seconds} seconds")
+            except Exception as e:
+                messages.error(request, f"Error processing track file: {str(e)}")
+                return redirect('audio_edit', id=id)
         try:
             audio.save()
             messages.success(request, "Audio track updated successfully!")
             return redirect('audio_list')
         except Exception as e:
             messages.error(request, f"Error updating audio track: {str(e)}")
-    
-    context = {
-        'audio': audio,
-    }
+    context = { 'audio': audio, 'admin_user': request.user,}
     return render(request, 'admin/audio_edit.html', context)
 
 # Delete an audio track
@@ -563,6 +776,7 @@ def customer_list(request):
     page_obj = paginator.get_page(page_number)
 
     context = {
+        'admin_user': request.user,
         'customers': page_obj,
     }
     return render(request, 'admin/customer_list.html', context)
@@ -590,10 +804,12 @@ def customer_create(request):
             return redirect('customer_list')
         except Exception as e:
             messages.error(request, f"Error creating customer: {str(e)}")
+    context = {
+        'admin_user': request.user,
+    }
     return render(request, 'admin/customer_create.html')                            
 
 
-# Edit Customer
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required
 def customer_edit(request, id):
@@ -603,30 +819,38 @@ def customer_edit(request, id):
         name_parts = name.split()
         first_name = name_parts[0] if len(name_parts) > 0 else ''
         last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
-        customer.user.first_name = first_name
-        customer.user.last_name = last_name
+
+        # Fetch related user instance
+        user = customer.user  
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = request.POST.get('email')
+        user.username = request.POST.get('email')
+
+        password = request.POST.get('password')
+        if password:
+            user.password = make_password(password)
+
+        # Update customer fields
         customer.phone_number = request.POST.get('phone_number')
         customer.gender = request.POST.get('gender')
         customer.dob = request.POST.get('dob')
         customer.status = request.POST.get('status')
-        customer.user.email = request.POST.get('email')
 
-        password = request.POST.get('password')
-
-        if password:
-            customer.user.password = make_password(password)
         if request.FILES.get('profile_image'):
             customer.profile_image = request.FILES['profile_image']
 
         try:
+            # Save both user and customer instances
+            user.save()
             customer.save()
-            customer.user.save()
             messages.success(request, "Customer updated successfully!")
             return redirect('customer_list')
         except Exception as e:
             messages.error(request, f"Error updating customer: {str(e)}")
 
     context = {
+        'admin_user': request.user,
         'customer': customer,
     }
     return render(request, 'admin/customer_edit.html', context)
@@ -648,3 +872,79 @@ def customer_delete(request, id):
     return JsonResponse({'success': False, 'message': 'Invalid request method.'})
 
 
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def gallery_list(request):
+    galleries = models.Gallery.objects.prefetch_related('images').all()
+    paginator = Paginator(galleries, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)  
+    context = {
+        'admin_user': request.user,
+        'galleries': page_obj,
+    }
+    return render(request, 'admin/gallery_list.html', context)
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def gallery_create(request):
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        images = request.FILES.getlist('images') 
+        try:
+            with transaction.atomic():
+                gallery = models.Gallery.objects.create(title=title)
+                for image in images:
+                    models.GalleryImage.objects.create(gallery=gallery, image=image)
+            messages.success(request, "Gallery created successfully!")
+            return redirect('gallery_list')
+        except Exception as e:
+            messages.error(request, f"Error creating gallery: {str(e)}")
+    context = { 'admin_user': request.user, }
+    return render(request, 'admin/gallery_create.html', context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def gallery_edit(request, id):
+    gallery = get_object_or_404(models.Gallery, id=id)
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        images = request.FILES.getlist('images')
+        remove_images = request.POST.getlist('remove_images')
+        try:
+            with transaction.atomic():
+                gallery.title = title
+                gallery.save()
+                for image in images:
+                    models.GalleryImage.objects.create(gallery=gallery, image=image)
+                for image_id in remove_images:
+                    try:
+                        image = models.GalleryImage.objects.get(id=image_id)
+                        image.delete()
+                    except models.GalleryImage.DoesNotExist:
+                        print("model not found")
+            messages.success(request, "Gallery updated successfully!")
+            return redirect('gallery_list')
+        except Exception as e:
+            messages.error(request, f"Error updating gallery: {str(e)}")
+    context = {
+        'admin_user': request.user,
+        'gallery': gallery,
+    }
+    return render(request, 'admin/gallery_edit.html', context)
+
+
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+@login_required
+def gallery_delete(request, id):
+    if request.method == 'POST':
+        try:
+            gallery = get_object_or_404(models.Gallery, id=id)
+            gallery.images.all().delete()
+            gallery.delete()
+            messages.success(request, "Gallery deleted successfully!")
+            return JsonResponse({'success': True, 'message': 'Gallery deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+    return JsonResponse({'success': False, 'message': 'Invalid request method.'})

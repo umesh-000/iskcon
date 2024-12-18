@@ -53,7 +53,7 @@
                     <div class="p-3 bg-light mb-3 rounded">
                         <div class="row justify-content-end g-2">
                             <div class="col-lg-2">
-                                <button type="submit" class="btn btn-outline-primary w-100">Submit</button>
+                                <button type="submit" class="btn btn-primary w-100">Submit</button>
                             </div>
                         </div>
                     </div>
@@ -61,6 +61,18 @@
             </div>
         </div>
     </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
 </div>
 <script>
     ClassicEditor.create(document.querySelector("#content"))

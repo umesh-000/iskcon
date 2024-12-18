@@ -6,6 +6,7 @@ urlpatterns = [
     path('customers/register/', API_views.RegisterView.as_view(), name='customer_register'),
     path('customers/login/', API_views.LoginView.as_view(), name='customer_login'),
 
+    path('customers/blogCategories/', API_views.blogCategories, name='blogCategories_api'),
     path('customers/blogs/', API_views.blogs, name='blogs_api'),
     path('customers/blogs/<int:id>/', API_views.blog_details, name='blog_details_api'),
     path('customers/books/', API_views.books, name='books_api'),
@@ -23,5 +24,8 @@ urlpatterns = [
     path('customers/reset-password/', API_views.resetPassword, name='reset_password'),
     path('customers/<int:customer_id>/update/', API_views.customerUpdate, name='customerUpdate_api'),
     path('customers/delete/', API_views.customersDelete, name='customersDelete_api'),
+    path('customers/notifications/', API_views.customersNotifications, name='customersNotifications_api'),
+    path('customers/gallery/', API_views.getGallery, name='getGallery_api'),
+    path('customers/gallery/<int:id>/', API_views.galleryDetail, name='gallery_detail_api'),
 
 ]

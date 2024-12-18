@@ -71,7 +71,7 @@
 
                                 <!-- Video File Upload -->
                                 <div class="col-lg-12">
-                                    <div class="mb-3">
+                                    <div class="mb-3 mt-3">
                                         <label for="videoFile" class="form-label">Upload Video</label>
                                         <input class="form-control" type="file" name="videoFile" id="videoFile" accept="video/*" required>
                                         <small class="text-danger invalid-feedback">Please upload a video file.</small>
@@ -94,10 +94,10 @@
                     <div class="p-3 bg-light mb-3 rounded">
                         <div class="row justify-content-end g-2">
                             <div class="col-lg-2">
-                                <button type="submit" class="btn btn-outline-secondary w-100">Create</button>
+                                <button type="submit" class="btn btn-primary w-100">Create</button>
                             </div>
                             <div class="col-lg-2">
-                                <a href="{% url 'video_list' %}" class="btn btn-primary w-100">Cancel</a>
+                                <a href="{% url 'video_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
                             </div>
                         </div>
                     </div>
@@ -105,6 +105,18 @@
             </div>
         </div>
     </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
 </div>
 
 <script>

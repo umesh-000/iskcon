@@ -1,0 +1,107 @@
+{% extends "admin/dashboard.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Admin | Create Gallery</title>
+{% endblock title %}
+
+{% block content %}
+<div class="page-content">
+    <div class="container-xxl">
+        <div class="row">
+            <div class="col-xl-12 col-lg-12">
+                <form id="gallery-form" action="{% url 'gallery_create' %}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Gallery Information Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Gallery Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- Title -->
+                                <div class="col-lg-12">
+                                    <div class="mb-3">
+                                        <label for="title" class="form-label">Gallery Title</label>
+                                        <input type="text" name="title" id="title" class="form-control" placeholder="Enter Gallery Title" required>
+                                        <small class="text-danger invalid-feedback">Please provide a title.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Upload Images</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="images" class="form-label">Upload Images</label>
+                                <!-- Preview Section -->
+                                <div id="file-previews" style="display: flex; flex-wrap: wrap;" class="mb-1">
+                                    <!-- Image previews will be added here -->
+                                </div>
+                                <input type="file" class="form-control" id="images" name="images" multiple accept="image/*" required>
+                                <small class="text-muted">You can select multiple images.</small>
+                                <small class="text-danger invalid-feedback">Please upload at least one image.</small>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="p-3 bg-light mb-3 rounded">
+                        <div class="row justify-content-end g-2">
+                            <div class="col-lg-2">
+                                <button type="submit" class="btn btn-primary w-100">Create Gallery</button>
+                            </div>
+                            <div class="col-lg-2">
+                                <a href="{% url 'gallery_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
+</div>
+
+<script>
+    const imageInput = document.getElementById('images');
+    const filePreviews = document.getElementById('file-previews');
+
+    imageInput.addEventListener('change', function () {
+        filePreviews.innerHTML = ''; // Clear previous previews
+        const files = Array.from(this.files);
+
+        files.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100px';
+                img.style.margin = '5px';
+                img.style.border = '1px solid #ddd';
+                img.style.borderRadius = '4px';
+                filePreviews.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+</script>
+{% endblock %}

@@ -23,82 +23,16 @@
 
                          <!-- Menu Toggle Button -->
                          <div class="topbar-item">
-                              
                               <h4 class="fw-bold topbar-button pe-none text-uppercase mb-0">Welcome! <p  class="fw-bold footer-text">{{ admin_user.username}}</p></h4>
                          </div>
                     </div>
 
                     <div class="d-flex align-items-center gap-1">
-
-                         <!-- App Search-->
-                         <form class="app-search d-none d-md-block ms-2">
-                              <div class="position-relative">
-                                   <input type="search" class="form-control" placeholder="Search..." autocomplete="off" value="">
-                                   <iconify-icon icon="solar:magnifer-linear" class="search-widget-icon"></iconify-icon>
-                              </div>
-                         </form>
-
                          <!-- Theme Color (Light/Dark) -->
                          <div class="topbar-item">
                               <button type="button" class="topbar-button" id="light-dark-mode">
                                    <iconify-icon icon="solar:moon-bold-duotone" class="fs-24 align-middle"></iconify-icon>
                               </button>
-                         </div>
-
-                         <!-- Notification -->
-                         <div class="dropdown topbar-item">
-                              <button type="button" class="topbar-button position-relative" id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                   <iconify-icon icon="solar:bell-bing-bold-duotone" class="fs-24 align-middle"></iconify-icon>
-                                   <span class="position-absolute topbar-badge fs-10 translate-middle badge bg-danger rounded-pill">2<span class="visually-hidden">unread messages</span></span>
-                              </button>
-                              <div class="dropdown-menu py-0 dropdown-lg dropdown-menu-end" aria-labelledby="page-header-notifications-dropdown">
-                                   <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
-                                        <div class="row align-items-center">
-                                             <div class="col">
-                                                  <h6 class="m-0 fs-16 fw-semibold"> Notifications</h6>
-                                             </div>
-                                             <div class="col-auto">
-                                                  <a href="javascript: void(0);" class="text-dark text-decoration-underline">
-                                                       <small>Clear All</small>
-                                                  </a>
-                                             </div>
-                                        </div>
-                                   </div>
-                                   <div data-simplebar style="max-height: 280px;">
-                                        <!-- Item -->
-                                        <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom">
-                                             <div class="d-flex">
-                                                  <div class="flex-shrink-0">
-                                                       <img src="{% static '/assets/images/users/avatar-3.jpg' %}" class="img-fluid me-2 avatar-sm rounded-circle" alt="avatar-3" />
-                                                  </div>
-                                                  <div class="flex-grow-1">
-                                                       <p class="mb-0 fw-semibold">Jacob Gines</p>
-                                                       <p class="mb-0 text-wrap">Answered to your comment on the cash flow forecast's graph 🔔.</p>
-                                                  </div>
-                                             </div>
-                                        </a>
-                                        <!-- Item -->
-                                        <a href="javascript:void(0);" class="dropdown-item py-3 border-bottom">
-                                             <div class="d-flex">
-                                                  <div class="flex-shrink-0">
-                                                       <div class="avatar-sm me-2">
-                                                            <span class="avatar-title bg-soft-warning text-warning fs-20 rounded-circle">
-                                                                 <iconify-icon icon="iconamoon:comment-dots-duotone"></iconify-icon>
-                                                            </span>
-                                                       </div>
-                                                  </div>
-                                                  <div class="flex-grow-1">
-                                                       <p class="mb-0 fw-semibold text-wrap">You have received <b>20</b> new messages in the
-                                                            conversation</p>
-                                                  </div>
-                                             </div>
-                                        </a>
-                                        
-                                   </div>
-                                   <div class="text-center py-3">
-                                        <a href="javascript:void(0);" class="btn btn-primary btn-sm">View All Notification <i class="bx bx-right-arrow-alt ms-1"></i></a>
-                                   </div>
-                              </div>
                          </div>
 
                          <!-- Theme Setting -->
@@ -112,8 +46,8 @@
                          <div class="dropdown topbar-item">
                               <a type="button" class="topbar-button" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                    <span class="d-flex align-items-center">
-                                       {% if admin_profile.user.profile_image %}
-                                           <img class="rounded-circle" width="32" src="{{ admin_profile.user.profile_image.url }}" alt="User Image">
+                                       {% if admin_user.admin_profile.profile_image %}
+                                           <img class="rounded-circle" width="32" src="{{ admin_user.admin_profile.profile_image.url }}" alt="User Image">
                                        {% else %}
                                            <img class="rounded-circle" width="32" src="{% static 'assets/images/users/default_avatar.png' %}" alt="Default Image">
                                        {% endif %}
@@ -122,7 +56,7 @@
                               <div class="dropdown-menu dropdown-menu-end">
                                    <!-- item-->
                                    <h6 class="dropdown-header">Welcome <p  class="fw-bold footer-text">{{ admin_user.username}}</p></h6>
-                                   <a class="dropdown-item" href="">
+                                   <a class="dropdown-item" href="{% url 'admin_profile_details' admin_user.id %}">
                                         <i class="bx bx-user-circle text-muted fs-18 align-middle me-1"></i><span class="align-middle">Profile</span>
                                    </a>
                                    <div class="dropdown-divider my-1"></div>
@@ -254,14 +188,14 @@
      <div class="main-nav">
           <!-- Sidebar Logo -->
           <div class="logo-box">
-               <a href="index.html" class="logo-dark">
+               <a href="{% url "admin_dashboard" %}" class="logo-dark">
                     <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-sm" alt="logo sm"> 
                     <div style="display: flex; justify-content: center; align-items: center;">
                          <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-lg pt-2 mb-2" alt="logo" style="height:60px; width:100px;">
                      </div>
                </a>
 
-               <a href="index.html" class="logo-light">
+               <a href="{% url "admin_dashboard" %}" class="logo-light">
                     <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-sm" alt="logo sm">
                     <div style="display: flex; justify-content: center; align-items: center;">
                          <img src="{% static 'site_assets/img/home/grocery/iskconlogo.png' %}" class="logo-lg pt-2 mb-2" alt="logo light" style="height:60px; width:100px;">
@@ -288,6 +222,14 @@
                          </a>
                     </li>
 
+                    <li class="nav-item">
+                         <a class="nav-link" href="{% url 'blog_categories_list' %}">
+                              <span class="nav-icon">
+                                   <iconify-icon icon="mdi:folder"></iconify-icon>
+                              </span>
+                              <span class="nav-text"> Blog Categories</span>
+                         </a>
+                    </li>
 
                     <li class="nav-item">
                          <a class="nav-link" href="{% url 'blog_list' %}">
@@ -373,9 +315,18 @@
                      <li class="nav-item">
                          <a class="nav-link" href="{% url 'customer_list' %}">
                              <span class="nav-icon">
-                                 <iconify-icon icon="mdi:bell-ring-outline"></iconify-icon>
+                                 <iconify-icon icon="mdi:account-multiple-outline"></iconify-icon>
                              </span>
-                             <span class="nav-text"> User </span>
+                             <span class="nav-text"> Users </span>
+                         </a>
+                     </li>
+
+                     <li class="nav-item">
+                         <a class="nav-link" href="{% url 'gallery_list' %}">
+                             <span class="nav-icon">
+                                 <iconify-icon icon="mdi:camera-outline"></iconify-icon>
+                             </span>
+                             <span class="nav-text"> Gallery </span>
                          </a>
                      </li>
 
@@ -394,7 +345,7 @@
           <div class="container-fluid">
                 <!-- Start here.... -->
                 <div class="row">
-                    <div class="col-xxl-5">
+                    <div class="col-xxl-12">
                          <div class="row">
                               <div class="col-md-4">
                                    <div class="card overflow-hidden">
@@ -406,19 +357,10 @@
                                                        </div>
                                                   </div> <!-- end col -->
                                                   <div class="col-6 text-end">
-                                                       <p class="text-muted mb-0 text-truncate">Total Orders</p>
-                                                       <h3 class="text-dark mt-1 mb-0">{{ total_orders }}</h3>
+                                                       <p class="text-muted mb-0 text-truncate">All Users</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ all_users }}</h3>
                                                   </div> <!-- end col -->
                                              </div> <!-- end row-->
-                                        </div> <!-- end card body -->
-                                        <div class="card-footer py-2 bg-light bg-opacity-50">
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                  <div>
-                                                       <span class="text-success"> <i class="bx bxs-up-arrow fs-12"></i> 2.3%</span>
-                                                       <span class="text-muted ms-1 fs-12">Last Week</span>
-                                                  </div>
-                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
-                                             </div>
                                         </div> <!-- end card body -->
                                    </div> <!-- end card -->
                               </div> <!-- end col -->
@@ -432,19 +374,10 @@
                                                        </div>
                                                   </div> <!-- end col -->
                                                   <div class="col-6 text-end">
-                                                       <p class="text-muted mb-0 text-truncate">Total revenue</p>
-                                                       <h3 class="text-dark mt-1 mb-0"> ₹{{ total_revenue }}</h3>
+                                                       <p class="text-muted mb-0 text-truncate">Total Customers</p>
+                                                       <h3 class="text-dark mt-1 mb-0"> {{ total_customers }}</h3>
                                                   </div> <!-- end col -->
                                              </div> <!-- end row-->
-                                        </div> <!-- end card body -->
-                                        <div class="card-footer py-2 bg-light bg-opacity-50">
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                  <div>
-                                                       <span class="text-success"> <i class="bx bxs-up-arrow fs-12"></i> 8.1%</span>
-                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
-                                                  </div>
-                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
-                                             </div>
                                         </div> <!-- end card body -->
                                    </div> <!-- end card -->
                               </div> <!-- end col -->
@@ -458,19 +391,10 @@
                                                        </div>
                                                   </div> <!-- end col -->
                                                   <div class="col-6 text-end">
-                                                       <p class="text-muted mb-0 text-truncate">Total users</p>
-                                                       <h3 class="text-dark mt-1 mb-0">{{ total_customers }}</h3>
+                                                       <p class="text-muted mb-0 text-truncate">Total Blog Categories</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_blog_categories }}</h3>
                                                   </div> <!-- end col -->
                                              </div> <!-- end row-->
-                                        </div> <!-- end card body -->
-                                        <div class="card-footer py-2 bg-light bg-opacity-50">
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                  <div>
-                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 0.3%</span>
-                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
-                                                  </div>
-                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
-                                             </div>
                                         </div> <!-- end card body -->
                                    </div> <!-- end card -->
                               </div> <!-- end col -->
@@ -484,19 +408,10 @@
                                                        </div>
                                                   </div> <!-- end col -->
                                                   <div class="col-6 text-end">
-                                                       <p class="text-muted mb-0 text-truncate">Recent orders</p>
-                                                       <h3 class="text-dark mt-1 mb-0">{{ last_7_days_orders_count }}</h3>
+                                                       <p class="text-muted mb-0 text-truncate">Total Blogs</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_blogs }}</h3>
                                                   </div> <!-- end col -->
                                              </div> <!-- end row-->
-                                        </div> <!-- end card body -->
-                                        <div class="card-footer py-2 bg-light bg-opacity-50">
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                  <div>
-                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 10.6%</span>
-                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
-                                                  </div>
-                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
-                                             </div>
                                         </div> <!-- end card body -->
                                    </div> <!-- end card -->
                               </div> <!-- end col -->
@@ -510,19 +425,10 @@
                                                        </div>
                                                   </div> <!-- end col -->
                                                   <div class="col-6 text-end">
-                                                       <p class="text-muted mb-0 text-truncate">Bestselling products</p>
-                                                       <h3 class="text-dark mt-1 mb-0">1</h3>
+                                                       <p class="text-muted mb-0 text-truncate">Total Books</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_books }}</h3>
                                                   </div> <!-- end col -->
                                              </div> <!-- end row-->
-                                        </div> <!-- end card body -->
-                                        <div class="card-footer py-2 bg-light bg-opacity-50">
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                  <div>
-                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 10.6%</span>
-                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
-                                                  </div>
-                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
-                                             </div>
                                         </div> <!-- end card body -->
                                    </div> <!-- end card -->
                               </div>
@@ -536,43 +442,68 @@
                                                        </div>
                                                   </div> <!-- end col -->
                                                   <div class="col-6 text-end">
-                                                       <p class="text-muted mb-0 text-truncate">Total sales (daily/weekly/monthly)</p>
-                                                       <h3 class="text-dark mt-1 mb-0">1</h3>
+                                                       <p class="text-muted mb-0 text-truncate">Total Videos</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_videos }}</h3>
                                                   </div> <!-- end col -->
                                              </div> <!-- end row-->
                                         </div> <!-- end card body -->
-                                        <div class="card-footer py-2 bg-light bg-opacity-50">
-                                             <div class="d-flex align-items-center justify-content-between">
-                                                  <div>
-                                                       <span class="text-danger"> <i class="bx bxs-down-arrow fs-12"></i> 10.6%</span>
-                                                       <span class="text-muted ms-1 fs-12">Last Month</span>
-                                                  </div>
-                                                  <a href="#!" class="text-reset fw-semibold fs-12">View More</a>
-                                             </div>
+                                   </div> <!-- end card -->
+                              </div>
+
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <i class="fs-24 avatar-title text-primary">₹</i>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Total Audios</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_audios }}</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div>
+
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <i class="fs-24 avatar-title text-primary">₹</i>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Total Events</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_events }}</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
+                                        </div> <!-- end card body -->
+                                   </div> <!-- end card -->
+                              </div>
+
+                              <div class="col-md-4">
+                                   <div class="card overflow-hidden">
+                                        <div class="card-body">
+                                             <div class="row">
+                                                  <div class="col-6">
+                                                       <div class="avatar-md bg-soft-primary rounded">
+                                                            <i class="fs-24 avatar-title text-primary">₹</i>
+                                                       </div>
+                                                  </div> <!-- end col -->
+                                                  <div class="col-6 text-end">
+                                                       <p class="text-muted mb-0 text-truncate">Total Gallery</p>
+                                                       <h3 class="text-dark mt-1 mb-0">{{ total_galleries }}</h3>
+                                                  </div> <!-- end col -->
+                                             </div> <!-- end row-->
                                         </div> <!-- end card body -->
                                    </div> <!-- end card -->
                               </div>
                          </div> <!-- end row -->
-                    </div> <!-- end col -->
-
-                    <div class="col-xxl-7">
-                         <div class="card">
-                              <div class="card-body">
-                                   <div class="d-flex justify-content-between align-items-center">
-                                        <h4 class="card-title">Performance</h4>
-                                        <div>
-                                             <button type="button" class="btn btn-sm btn-outline-light">ALL</button>
-                                             <button type="button" class="btn btn-sm btn-outline-light">1M</button>
-                                             <button type="button" class="btn btn-sm btn-outline-light">6M</button>
-                                             <button type="button" class="btn btn-sm btn-outline-light active">1Y</button>
-                                        </div>
-                                   </div> <!-- end card-title-->
-
-                                   <div dir="ltr">
-                                        <div id="dash-performance-chart" class="apex-charts"></div>
-                                   </div>
-                              </div> <!-- end card body -->
-                         </div> <!-- end card -->
                     </div> <!-- end col -->
                </div> <!-- end row -->
           </div>
@@ -584,7 +515,7 @@
               <div class="container-fluid">
                   <div class="row">
                       <div class="col-12 text-center">
-                          <script>document.write(new Date().getFullYear())</script> &copy; Aquarium E-Commerce. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                          <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
                       </div>
                   </div>
               </div>

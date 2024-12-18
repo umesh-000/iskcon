@@ -14,6 +14,23 @@
                 <form id="about-form" action="{% url 'about_us' %}" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                     {% csrf_token %}
 
+                    <!-- About Thumbnail Upload Section -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Add About Thumbnail ( Optional )</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- Check if image exists -->
+                            {% if about_us.image %}
+                                <div class="image-preview mb-2">
+                                    <img src="{{ about_us.image.url }}" alt="About Us Thumbnail" class="img-fluid" style="max-width: 200px;border-radius:10px;">
+                                </div>
+                            {% endif %}
+                            <div id="file-previews" style="display: flex; flex-wrap: wrap;"></div>
+                            <input class="form-control" name="thumbnail" type="file" accept="image/*" id="thumbnailUpload">
+                        </div>
+                    </div>
+
                     <!-- General Information Section -->
                     <div class="card">
                         <div class="card-header">
@@ -53,7 +70,7 @@
                         <div class="p-3 bg-light mb-3 rounded">
                             <div class="row justify-content-end g-2">
                                 <div class="col-lg-2">
-                                    <button type="submit" class="btn btn-outline-primary w-100">Submit</button>
+                                    <button type="submit" class="btn btn-primary w-100">Submit</button>
                                 </div>
                             </div>
                         </div>
@@ -62,6 +79,18 @@
             </div>
         </div>
     </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
 </div>
 
 <script>
@@ -75,6 +104,33 @@
     .catch((error) => {
       console.error(error);
     });
+    
+    
+    document.getElementById('thumbnailUpload').addEventListener('change', function(event) {
+        const filePreviews = document.getElementById('file-previews');
+        filePreviews.innerHTML = ''; // Clear previous previews
+    
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+    
+            reader.onload = function(e) {
+                const imgElement = document.createElement('img');
+                imgElement.src = e.target.result;
+                imgElement.style.maxWidth = '150px';
+                imgElement.style.marginRight = '10px';
+                imgElement.style.marginBottom = '10px';
+                imgElement.style.border = '1px solid #ddd';
+                imgElement.style.borderRadius = '4px';
+                filePreviews.appendChild(imgElement);
+            };
+    
+            reader.readAsDataURL(file);
+        } else {
+            alert('Please upload a valid image file.');
+        }
+    });
 </script>
+
 
 {% endblock %}

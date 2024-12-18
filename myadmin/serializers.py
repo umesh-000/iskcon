@@ -3,7 +3,7 @@ from accounts import models as account_models
 from myadmin import models as admin_models
 from django.contrib.auth import authenticate
 from rest_framework import serializers
-
+from django.utils.html import strip_tags
 
 class RegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
@@ -53,10 +53,36 @@ class LoginSerializer(serializers.Serializer):
                 raise serializers.ValidationError("Invalid email or password.")
         raise serializers.ValidationError("Email and password are required.")
 
+
+class BlogCategorySerializer(serializers.ModelSerializer):
+    description = serializers.SerializerMethodField()
+    class Meta:
+        model = admin_models.BlogCategory
+        fields = ['id', 'name', 'description', 'created_at', 'updated_at', 'is_active']
+    def get_description(self, obj):
+        return strip_tags(obj.description)
+
 class BlogSerializer(serializers.ModelSerializer):
+    description = serializers.SerializerMethodField()
+    added_by = serializers.SerializerMethodField()
     class Meta:
         model = admin_models.Blog
-        fields = ['id', 'added_by', 'title', 'subtitle', 'image', 'description', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'added_by', 'category', 'title', 'subtitle', 'image', 'description', 'status', 'created_at', 'updated_at']
+
+    def get_description(self, obj):
+        return strip_tags(obj.description)
+
+    def get_added_by(self, obj):
+        if obj.added_by:
+            admin_profile = getattr(obj.added_by, 'admins', None)
+            profile_image_url = admin_profile.profile_image.url if admin_profile and admin_profile.profile_image else None
+            
+            return {
+                "id":obj.added_by.id,
+                'username': obj.added_by.username,
+                'profile_image': profile_image_url
+            }
+        return None
 
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
@@ -64,9 +90,13 @@ class BookSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'author_name', 'cover_image', 'status', 'book_file', 'created_at', 'updated_at']
 
 class EventSerializer(serializers.ModelSerializer):
+    description = serializers.SerializerMethodField()
     class Meta:
         model = admin_models.Event
-        fields = ['id', 'title', 'description', 'venue', 'image', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'title','venue','event_datetime', 'address', 'description',  'image', 'status', 'created_at', 'updated_at']
+
+    def get_description(self, obj):
+        return strip_tags(obj.description)
 
 class PrivacyPolicySerializer(serializers.ModelSerializer):
     class Meta:
@@ -84,17 +114,34 @@ class AboutUsSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'content', 'is_active', 'created_at', 'updated_at')
         
 
-class videosSerializer(serializers.ModelSerializer):
+class VideosSerializer(serializers.ModelSerializer):
+    description = serializers.SerializerMethodField()
     class Meta:
         model = admin_models.Video
-        fields = '__all__' 
+        fields = '__all__'
+    def get_description(self, obj):
+        return strip_tags(obj.description) if obj.description else ''
 
 
+class UploadedBySerializer(serializers.ModelSerializer):
+    profile_image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = account_models.User
+        fields = ['id', 'username', 'profile_image']
+
+    def get_profile_image(self, obj):
+        admin_profile = account_models.Admins.objects.filter(user=obj).first()
+        if admin_profile and admin_profile.profile_image:
+            return self.context['request'].build_absolute_uri(admin_profile.profile_image.url)
+        return None
+    
 class audiosSerializer(serializers.ModelSerializer):
+    uploaded_by = UploadedBySerializer()
+
     class Meta:
         model = admin_models.Audio
-        fields = '__all__' 
-
+        fields = '__all__'
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -138,3 +185,20 @@ class ResetPasswordSerializer(serializers.Serializer):
         if not account_models.Customer.objects.filter(id=customer_id, user__email=email, user__user_type='customer').exists():
             raise serializers.ValidationError("No customer found with this email and customer ID.")
         return data
+    
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = admin_models.Notification
+        fields = ['id', 'title', 'message', 'target_audience', 'image', 'is_active', 'created_at', 'updated_at']
+
+
+class GalleryImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = admin_models.GalleryImage
+        fields = ['id', 'image', 'uploaded_at'] 
+
+class GallerySerializer(serializers.ModelSerializer):
+    images = GalleryImageSerializer(many=True, read_only=True)
+    class Meta:
+        model = admin_models.Gallery
+        fields = ['id', 'title', 'created_at', 'images'] 

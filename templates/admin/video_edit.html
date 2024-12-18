@@ -75,15 +75,15 @@
 
                                 <!-- Video File Upload -->
                                 <div class="col-lg-12">
-                                    <div class="mt-2">
-                                        <label for="videoFile" class="form-label pt-1">Upload Video</label>
+                                    <div class="mt-3">
+                                        <label for="videoFile" class="form-label">Upload Video</label>
                                         <!-- Video Preview -->
                                        {% if video.video_file %}
-                                        <div id="videoPreview" style="margin-top: 20px;">
-                                          <video id="videoPlayer" width="150" controls>
-                                            <source src="{{ video.video_file.url }}" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>
+                                        <div id="videoPreview">
+                                            <video id="videoPlayer" width="150" controls>
+                                                <source src="{{ video.video_file.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
                                          </div>
                                        {% endif %}
                                         <input class="form-control mt-2" type="file" name="videoFile" id="videoFile" accept="video/*">
@@ -98,10 +98,10 @@
                     <div class="p-3 bg-light mb-3 rounded">
                         <div class="row justify-content-end g-2">
                             <div class="col-lg-2">
-                                <button type="submit" class="btn btn-outline-secondary w-100">Save Changes</button>
+                                <button type="submit" class="btn btn-primary w-100">Save Changes</button>
                             </div>
                             <div class="col-lg-2">
-                                <a href="{% url 'video_list' %}" class="btn btn-primary w-100">Cancel</a>
+                                <a href="{% url 'video_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
                             </div>
                         </div>
                     </div>
@@ -109,6 +109,18 @@
             </div>
         </div>
     </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
 </div>
 
 <script>

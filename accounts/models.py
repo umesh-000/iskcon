@@ -17,7 +17,7 @@ class User(AbstractUser):
 
 # Admin model
 class Admins(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,related_name='admin_profile')
     profile_image = models.ImageField(upload_to='admin/profiles/', blank=True, null=True)
     class Meta:
         db_table = 'admins'
@@ -29,7 +29,7 @@ class Customer(models.Model):
     phone_number = models.CharField(max_length=15, blank=True, null=True)
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES,null=True, blank=True)
     dob = models.DateField(null=True, blank=True)
-    status = models.IntegerField(choices=STATUS_CHOICES, default=0, verbose_name="Status")  
+    status = models.IntegerField(choices=STATUS_CHOICES, default=1, verbose_name="Status")  
     create_at = models.DateTimeField(default=timezone.now)
     update_at = models.DateTimeField(default=timezone.now)
 

@@ -6,8 +6,14 @@ from django.urls import path, include
 
 urlpatterns = [
     path('', views.admin_dashboard, name='admin_dashboard'),    
-    # path('<int:id>/profile_details', views.admin_profile_details, name='admin_profile_details'),
-    # path('<int:id>/change_password', views.admin_change_password, name='admin_change_password'),
+    path('<int:id>/profile_details', views.admin_profile_details, name='admin_profile_details'),
+    path('<int:id>/change_password', views.admin_change_password, name='admin_change_password'),
+
+    path('blog-categories/', views.blog_categories_list, name='blog_categories_list'),
+    path('blog-categories/create/', views.blog_categories_create, name='blog_categories_create'),
+    path('blog-categories/<int:id>/edit/', views.blog_categories_edit, name='blog_categories_edit'),
+    path('blog-categories/<int:id>/delete/', views.blog_categories_delete, name='blog_categories_delete'),
+
 
     path('blogs/', views.blog_list, name='blog_list'),
     path('blogs/create/', views.blog_create, name='blog_create'),
@@ -29,7 +35,8 @@ urlpatterns = [
     path('terms-and-conditions/', views.terms_and_conditions, name='terms_and_conditions'),
 
     path('notifications/', views.notifications, name='notifications'),
-    path('notification_create/', views.notification_create, name='notification_create'),
+    path('notifications/create/', views.notification_create, name='notification_create'),
+    path('notifications/<int:id>/delete/', views.notification_delete, name='notification_delete'),   
 
     path('videos/', views.video_list, name='video_list'),
     path('videos/create/', views.video_create, name='video_create'),
@@ -42,10 +49,15 @@ urlpatterns = [
     path('audio/<int:id>/delete/', views.audio_delete, name='audio_delete'),
 
     # Customer URLs
-    path('customers/', views.customer_list, name='customer_list'),  # List all customers
-    path('customers/create/', views.customer_create, name='customer_create'),  # Create a customer
-    path('customers/<int:id>/', views.customer_edit, name='customer_edit'),  # View a customer
-    path('customers/<int:id>/delete/', views.customer_delete, name='customer_delete'),  # Delete a customer
+    path('customers/', views.customer_list, name='customer_list'), 
+    path('customers/create/', views.customer_create, name='customer_create'),
+    path('customers/<int:id>/edit', views.customer_edit, name='customer_edit'), 
+    path('customers/<int:id>/delete/', views.customer_delete, name='customer_delete'), 
 
+    # Customer URLs
+    path('galleries/', views.gallery_list, name='gallery_list'), 
+    path('galleries/create/', views.gallery_create, name='gallery_create'),
+    path('customers/<int:id>/edit/', views.gallery_edit, name='gallery_edit'), 
+    path('galleries/<int:id>/delete/', views.gallery_delete, name='gallery_delete'), 
 ]
 

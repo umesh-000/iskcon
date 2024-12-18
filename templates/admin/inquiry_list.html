@@ -136,18 +136,18 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <script>document.write(new Date().getFullYear())</script> &copy; Aquarium E-Commerce. Developed by 
-                    <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> 
-                    <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </footer>
+        </footer>
+    {% endblock footer %}
 </div>
 
 

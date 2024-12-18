@@ -6,12 +6,16 @@ from myadmin import serializers as API_serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import AboutUs, Audio, Blog,Book,Event,PrivacyPolicy,TermsAndConditions, Video
 from django.db import transaction
 from accounts import models as account_models
+from myadmin import models as admin_models
 from rest_framework import status
 from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 import logging
 import secrets
 from django.contrib.auth.hashers import make_password
@@ -44,7 +48,6 @@ class RegisterView(APIView):
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 class LoginView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
@@ -54,12 +57,12 @@ class LoginView(APIView):
             if user:
                 refresh = RefreshToken.for_user(user)
                 access_token_expiry = datetime.now() + settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME']
-                access_token_expiry_minutes = int(settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds() // 60)
+                access_token_expiry_hours = int(settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds() // 3600)
                 return Response({
                     'email': user.email,
                     'user_type': user.user_type,
                     'access_token': str(refresh.access_token),
-                    'access_token_expiry': f"{access_token_expiry_minutes} minutes",
+                    'access_token_expiry': f"{access_token_expiry_hours} hours",
                     'message': 'Login successful'
                 }, status=status.HTTP_200_OK)
             else:
@@ -70,8 +73,22 @@ class LoginView(APIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([JWTAuthentication])
+def blogCategories(request):
+    categories = admin_models.BlogCategory.objects.filter(is_active=True).order_by('-created_at')
+    serializer = API_serializers.BlogCategorySerializer(categories, many=True)
+    return Response({'status': 'success', 'data': serializer.data})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
 def blogs(request):
-    blogs = Blog.objects.filter(status=1).order_by('-created_at')
+    category_id = request.GET.get('category_id')
+    if category_id:
+        print(category_id)
+        blogs = Blog.objects.filter(status=1, category=category_id).order_by('-created_at')
+    else:
+        blogs = Blog.objects.filter(status=1).order_by('-created_at')
     serializer = API_serializers.BlogSerializer(blogs, many=True)
     return Response({'status': 'success', 'data': serializer.data})
 
@@ -189,7 +206,7 @@ def about_us_view(request):
 def videos(request):
     try:
         videos = Video.objects.filter(status=1).order_by('-created_at')
-        serializer = API_serializers.videosSerializer(videos, many=True)
+        serializer = API_serializers.VideosSerializer(videos, many=True)
         return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -200,8 +217,8 @@ def videos(request):
 @authentication_classes([JWTAuthentication])
 def video_details(request, id):
     try:
-        video = Video.objects.get(id=id, status=1)  # Get video with active status
-        serializer = API_serializers.videosSerializer(video)  # Serialize the video object
+        video = Video.objects.get(id=id, status=1)
+        serializer = API_serializers.VideosSerializer(video)
         return Response({
             'status': 'success',
             'data': serializer.data
@@ -220,9 +237,7 @@ def video_details(request, id):
 @authentication_classes([JWTAuthentication])
 def audios(request):
     try:
-        # Fetch all active audios
         audios = Audio.objects.filter(status=1).order_by('-created_at')
-        # Serialize the audio data
         serializer = API_serializers.audiosSerializer(audios, many=True)
         return Response({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
     except Exception as e:
@@ -292,24 +307,17 @@ def resetPassword(request):
             new_password = secrets.token_urlsafe(8)
             user.password = make_password(new_password)
             user.save()
-            # Send password reset email
-            subject = "Password Reset Request"
-            message = (
-                f"Dear {user.first_name} {user.last_name},\n\n"
-                f"Your password has been successfully reset. Your new password is:\n\n"
-                f"{new_password}\n\n"
-                "Please log in and change your password immediately for security purposes.\n\n"
-                "Thank you."
-            )
-            from_email = "no-reply@example.com"
+            context = { 'user': user, 'new_password': new_password, }
+            subject = "Your Password Changed"
+            message = render_to_string('emails/password_changed_email.html', context)
+            from_email = settings.DEFAULT_FROM_EMAIL
             recipient_list = [email]
-            # Uncomment this line after configuring email settings in Django
-            # send_mail(subject, message, from_email, recipient_list)
+            send_mail(subject, message, from_email, recipient_list, html_message=message)
             return Response(
                 {
                     "status": "success",
                     "message": "A new password has been sent to the provided email.",
-                    "new_password": new_password,  # Optional: Include this only for debugging (remove in production)
+                    "new_password": new_password,
                 }, status=status.HTTP_200_OK,
             )
         except account_models.Customer.DoesNotExist:
@@ -336,3 +344,32 @@ def customersDelete(request):
         return Response({ 'status': 'error', 'message': 'Customer not found.' }, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({ 'status': 'error', 'message': str(e) }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def customersNotifications(request):
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    notifications = admin_models.Notification.objects.filter(target_audience='customer', is_active=True, created_at__gte=seven_days_ago).order_by('-created_at')
+    serializer = API_serializers.NotificationSerializer(notifications, many=True)
+    return Response({'notifications': serializer.data}, status=200)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def getGallery(request):
+    galleries = admin_models.Gallery.objects.all().order_by('-created_at')
+    serializer = API_serializers.GallerySerializer(galleries, many=True)
+    return Response({'status': 'success', 'data': serializer.data})
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([JWTAuthentication])
+def galleryDetail(request, id):
+    try:
+        gallery = admin_models.Gallery.objects.get(id=id)
+    except admin_models.Gallery.DoesNotExist:
+        return Response({'status': 'error', 'message': 'Gallery not found'}, status=404)
+    serializer = API_serializers.GallerySerializer(gallery)
+    return Response({'status': 'success', 'data': serializer.data})

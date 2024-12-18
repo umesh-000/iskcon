@@ -32,7 +32,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <!-- Blog Title -->
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="title" class="form-label">Title</label>
                                         <input type="text" name="title" id="title" class="form-control" placeholder="Enter Title" required>
@@ -42,7 +42,7 @@
 
 
                                 <!-- Blog Subtitle -->
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="Subtitle" class="form-label">Subtitle</label>
                                         <input type="text" name="subtitle" id="Subtitle" class="form-control" placeholder="Enter Subtitle" required>
@@ -50,8 +50,22 @@
                                     </div>
                                 </div>
                                 
+                                <!-- Blog Categories -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="category" class="form-label">Blog Category</label>
+                                        <select name="category_id" class="form-control" id="category" required>
+                                            <option selected value="">Select Blog Category</option>
+                                            {% for category in blog_categories %}
+                                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="text-danger invalid-feedback">Please select a category for the blog.</small>
+                                    </div>
+                                </div>
+
                                 <!-- Blog Status -->
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="status" class="form-label">Status</label>
                                         <select name="status" class="form-control" id="status" required>
@@ -76,10 +90,10 @@
                     <div class="p-3 bg-light mb-3 rounded">
                         <div class="row justify-content-end g-2">
                             <div class="col-lg-2">
-                                <button type="submit" class="btn btn-outline-secondary w-100">Create</button>
+                                <button type="submit" class="btn btn-primary w-100">Create</button>
                             </div>
                             <div class="col-lg-2">
-                                <a href="{% url 'blog_list' %}" class="btn btn-primary w-100">Cancel</a>
+                                <a href="{% url 'blog_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
                             </div>
                         </div>
                     </div>
@@ -87,6 +101,18 @@
             </div>
         </div>
     </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
 </div>
 <script>
     ClassicEditor

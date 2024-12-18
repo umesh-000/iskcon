@@ -130,7 +130,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=7),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,  
     'BLACKLIST_AFTER_ROTATION': False,
@@ -141,7 +141,6 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
 }
-
 
 # AUTH_USER_MODEL = 'hospital.Customer'
 AUTH_USER_MODEL = 'accounts.User'
@@ -173,3 +172,13 @@ SESSION_COOKIE_AGE = 3600
 # One Signal Setup
 ONESIGNAL_APP_ID = '41d3c263-8259-4ed0-9927-4ea681102950'
 ONESIGNAL_API_KEY = 'os_v2_app_ihj4ey4clfhnbgjhj2ticebjkaqnby5mkgbunk5exmj6gxhr7erxb2eoglcjhwlf5w5fj7veqkoz6phf7h4izfhi5ez3zhjegl6icoi'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'ghartaktech02@gmail.com'
+EMAIL_HOST_PASSWORD = 'nrps laqv lvdi dryy'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+ADMIN_EMAIL = 'ghartaktech03@gmail.com'

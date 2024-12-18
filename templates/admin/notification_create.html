@@ -29,20 +29,44 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <!-- Notification Title -->
-                                <div class="col-lg-12">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="title" class="form-label">Notification Title</label>
                                         <input type="text" name="title" id="title" class="form-control" placeholder="Enter Notification Title" required>
                                         <small class="text-danger invalid-feedback">Please enter a valid notification title.</small>
                                     </div>
                                 </div>
+                                
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="target_audience" class="form-label">Target Audience</label>
+                                        <select name="target_audience" class="form-control" id="target_audience" required>
+                                            <option selected value="">Select Target Audience</option>
+                                            <option value="all">All Users</option>
+                                            <option value="admin">Admins</option>
+                                            <option value="customer">Customers</option>
+                                        </select>
+                                        <small class="text-danger invalid-feedback">Please select a Target Audience</small>
+                                    </div>
+                                </div>
+
                             </div>
+
 
                             <!-- Notification Message -->
                             <div class="col-lg-12">
                                 <label for="message" class="form-label">Notification Message</label>
                                 <textarea name="message" id="message" class="form-control" placeholder="Enter Notification Message"></textarea>
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="mb-3 mt-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="is_active" id="is_active" class="form-check-input" {% if about_us.is_active %}checked{% endif %}>
+                                        <label class="form-check-label" for="is_active">Is Active</label>
+                                        <small class="text-danger invalid-feedback">Please confirm the active status.</small>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -51,10 +75,10 @@
                     <div class="p-3 bg-light mb-3 rounded">
                         <div class="row justify-content-end g-2">
                             <div class="col-lg-2">
-                                <button type="submit" class="btn btn-outline-secondary w-100">Create</button>
+                                <button type="submit" class="btn btn-primary w-100">Create</button>
                             </div>
                             <div class="col-lg-2">
-                                <a href="{% url 'notifications' %}" class="btn btn-primary w-100">Cancel</a>
+                                <a href="{% url 'notifications' %}" class="btn btn-outline-secondary w-100">Cancel</a>
                             </div>
                         </div>
                     </div>
@@ -62,6 +86,18 @@
             </div>
         </div>
     </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
 </div>
 
 <script>

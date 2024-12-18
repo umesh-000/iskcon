@@ -6,8 +6,25 @@ from django.conf import settings
 STATUS_CHOICES = [ (1, 'Active'), (0, 'Inactive'), ]
 TARGET_AUDIENCE_CHOICES = [('admin', 'Admin'),('customer', 'Customer'),('all', 'All Users'),]
 
+class BlogCategory(models.Model):
+    name = models.CharField(max_length=255, unique=True, verbose_name="Category Name")
+    description = models.TextField(blank=True, null=True, verbose_name="Description")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Last Updated At")
+
+    class Meta:
+        db_table = 'blog_categories'
+        verbose_name = 'Blog Category'
+        verbose_name_plural = 'Blog Categories'
+
+    def __str__(self):
+        return self.name
+
+
 class Blog(models.Model):
     added_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='blogs', verbose_name="Added By")
+    category = models.ForeignKey(BlogCategory, related_name='blogs', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Category")
     title = models.CharField(max_length=255, verbose_name="Title")
     subtitle = models.CharField(max_length=255, blank=True, null=True, verbose_name="Subtitle")
     image = models.ImageField(upload_to='blogs/images/', blank=True, null=True, verbose_name="Featured Image")
@@ -46,11 +63,13 @@ class Event(models.Model):
     image = models.ImageField(upload_to='events/', blank=True, null=True, verbose_name="event Image")
     description = models.TextField(verbose_name="Description")
     venue = models.CharField(max_length=255, verbose_name="Venue", blank=True)
+    event_datetime = models.DateTimeField(verbose_name="Event Date and Time", blank=True, null=True)
+    address = models.CharField(max_length=500, verbose_name="Event Address", blank=True, null=True)
     status = models.IntegerField(choices=STATUS_CHOICES, default=0, verbose_name="Status")
     created_at = models.DateTimeField (auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
-        db_table = 'myadmin_event'
+        db_table = 'events'
         verbose_name = "Event"
         verbose_name_plural = "Events"
         ordering = ['-created_at']
@@ -61,6 +80,7 @@ class Event(models.Model):
 class AboutUs(models.Model):
     title = models.CharField(max_length=255, default="About Us")
     content = models.TextField()
+    image = models.ImageField(upload_to='about_us/', blank=True, null=True, verbose_name="About Image")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -133,14 +153,10 @@ class Video(models.Model):
     def __str__(self):
         return self.title
     
-    
-    
-
-
 class Audio(models.Model):
     title = models.CharField(max_length=255, verbose_name="Track Name")
     artist = models.CharField(max_length=255, verbose_name="Artist Name", blank=True, null=True)
-    duration = models.DurationField(verbose_name="Track Duration", blank=True, null=True)
+    duration = models.IntegerField(verbose_name="Track Duration (seconds)", blank=True, null=True)
     thumbnail = models.ImageField(upload_to='audio/thumbnails/', verbose_name="Track Thumbnail", blank=True, null=True)
     track_file = models.FileField(upload_to='audio/tracks/', verbose_name="Upload Track File")
     uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='uploaded_audio')
@@ -154,4 +170,28 @@ class Audio(models.Model):
         ordering = ['-created_at']
     def __str__(self):
         return self.title
+    
+class Gallery(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Gallery Title")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    class Meta:
+        db_table = 'gallery_albums'
+        verbose_name = "Gallery Album"
+        verbose_name_plural = "Gallery Albums"
+        ordering = ['-created_at']
 
+    def __str__(self):
+        return self.title
+
+class GalleryImage(models.Model):
+    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, related_name='images', verbose_name="Gallery")
+    image = models.ImageField(upload_to='gallery/images/', verbose_name="Upload Image")
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="Uploaded At")
+    class Meta:
+        db_table = 'gallery_images'
+        verbose_name = "Gallery Image"
+        verbose_name_plural = "Gallery Images"
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f"Image for {self.gallery.title}"

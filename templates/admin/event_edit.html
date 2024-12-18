@@ -35,7 +35,7 @@
                         <div class="card-body">
                             <div class="row">
                                 <!-- Event Title -->
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="title" class="form-label">Title</label>
                                         <input type="text" name="title" id="title" class="form-control" value="{{ event.title }}" placeholder="Enter Event Title" required>
@@ -44,7 +44,7 @@
                                 </div>
 
                                 <!-- Event Date -->
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="venue" class="form-label">Venue</label>
                                         <input type="text" name="venue" id="venue" value="{{ event.venue }}" class="form-control" placeholder="Enter Venue" required>
@@ -52,8 +52,19 @@
                                     </div>
                                 </div>
 
+                                <!-- Venue Date Time -->
+                                <div class="col-lg-6">
+                                    <div class="mb-3">
+                                        <label for="event_datetime" class="form-label">Event Date and Time</label>
+                                        <input type="datetime-local" name="event_datetime" 
+                                            value="{{ event.event_datetime|date:'Y-m-d\TH:i' }}" 
+                                            id="event_datetime" class="form-control" required>
+                                        <small class="text-danger invalid-feedback">Please enter the event date and time.</small>
+                                    </div>
+                                </div>
+
                                 <!-- Event Status -->
-                                <div class="col-lg-4">
+                                <div class="col-lg-6">
                                     <div class="mb-3">
                                         <label for="status" class="form-label">Status</label>
                                         <select name="status" class="form-control" id="status" required>
@@ -63,6 +74,12 @@
                                         </select>
                                         <small class="text-danger invalid-feedback">Please select the blog status.</small>
                                     </div>
+                                </div>
+
+                                <!-- Event Address -->
+                                <div class="col-lg-12 mb-3 ">
+                                    <label for="address" class="form-label">Event Address</label>
+                                    <textarea name="address" id="address" class="form-control" rows="2">{{ event.address }}</textarea>
                                 </div>
 
                                 <!-- Blog Description (CKEditor) -->
@@ -80,10 +97,10 @@
                     <div class="p-3 bg-light mb-3 rounded">
                         <div class="row justify-content-end g-2">
                             <div class="col-lg-2">
-                                <button type="submit" class="btn btn-outline-secondary w-100">Update</button>
+                                <button type="submit" class="btn btn-primary w-100">Update</button>
                             </div>
                             <div class="col-lg-2">
-                                <a href="{% url 'event_list' %}" class="btn btn-primary w-100">Cancel</a>
+                                <a href="{% url 'event_list' %}" class="btn btn-outline-secondary w-100">Cancel</a>
                             </div>
                         </div>
                     </div>
@@ -91,6 +108,18 @@
             </div>
         </div>
     </div>
+    {% block footer %}
+        <!-- ========== Footer Start ========== -->
+        <footer class="footer">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 text-center">
+                        <script>document.write(new Date().getFullYear())</script> &copy; ISKCON. Developed by <iconify-icon icon="iconamoon:heart-duotone" class="fs-18 align-middle text-danger"></iconify-icon> <a href="https://geegatechnologies.com/" class="fw-bold footer-text" target="_blank">GeegaTechnologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    {% endblock footer %}
 </div>
 <script>
     ClassicEditor
